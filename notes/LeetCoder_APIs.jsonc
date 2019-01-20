@@ -1,0 +1,198 @@
+/////////////////////////////////
+// Get for All problems
+GET https://leetcode.com/api/problems/all
+
+///////////////////////////////
+// Get a certain problem description ("count-complete-tree-nodes")
+POST https://leetcode.com/graphql
+content-type: application/json
+charset: utf-8
+
+{
+  "operationName": "questionData",
+  "variables": {
+    "titleSlug": "count-complete-tree-nodes"
+  },
+  "query": "query questionData($titleSlug: String!) {\n  question(titleSlug: $titleSlug) {\n    questionId\n    questionFrontendId\n    boundTopicId\n    title\n    titleSlug\n    content\n    translatedTitle\n    translatedContent\n    isPaidOnly\n    difficulty\n    likes\n    dislikes\n    isLiked\n    similarQuestions\n    contributors {\n      username\n      profileUrl\n      avatarUrl\n      __typename\n    }\n    langToValidPlayground\n    topicTags {\n      name\n      slug\n      translatedName\n      __typename\n    }\n    companyTagStats\n    codeSnippets {\n      lang\n      langSlug\n      code\n      __typename\n    }\n    stats\n    hints\n    solution {\n      id\n      canSeeDetail\n      __typename\n    }\n    status\n    sampleTestCase\n    metaData\n    judgerAvailable\n    judgeType\n    mysqlSchemas\n    enableRunCode\n    enableTestMode\n    envInfo\n    __typename\n  }\n}\n"
+}
+
+////////////////////////////////
+// Get problem solutions (if exist)
+POST https://leetcode.com/graphql
+content-type: application/json
+
+{
+  "operationName": "QuestionNote",
+  "variables": {
+    "titleSlug": "degree-of-an-array"
+  },
+  "query": "query QuestionNote($titleSlug: String!) {\n  question(titleSlug: $titleSlug) {\n    questionId\n    article\n    solution {\n      id\n      url\n      content\n      contentTypeId\n      canSeeDetail\n      rating {\n        id\n        count\n        average\n        userRating {\n          score\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"
+}
+
+
+///////////////////////////////
+// Get a certain problem submission status("count-complete-tree-nodes")
+POST https://leetcode.com/graphql
+content-type: application/json
+
+{
+  "operationName": "Submissions",
+  "variables": {
+    "offset": 0,
+    "limit": 20,
+    "lastKey": null,
+    "questionSlug": "count-complete-tree-nodes"
+  },
+  "query": "query Submissions($offset: Int!, $limit: Int!, $lastKey: String, $questionSlug: String!) {\n  submissionList(offset: $offset, limit: $limit, lastKey: $lastKey, questionSlug: $questionSlug) {\n    lastKey\n    hasNext\n    submissions {\n      id\n      statusDisplay\n      lang\n      runtime\n      timestamp\n      url\n      isPending\n      __typename\n    }\n    __typename\n  }\n}\n"
+}
+
+////////////////////////////////
+// Get discussion list ("count-complete-tree-nodes")
+POST https://leetcode.com/graphql
+content-type: application/json
+
+{
+  "operationName": "questionTopicsList",
+  "variables": {
+    "orderBy": "recent_activity",
+    "query": "",
+    "skip": 0, // Use skip to jump to next page eg: skip = 15 + first = 15 = get the 15 - 30 records
+    "first": 15,
+    "tags": [],
+    "questionId": "222"
+  },
+  "query": "query questionTopicsList($questionId: String!, $orderBy: String, $skip: Int, $query: String, $first: Int!) {\n  questionTopicsList(questionId: $questionId, orderBy: $orderBy, skip: $skip, query: $query, first: $first) {\n    ...TopicsList\n    __typename\n  }\n}\n\nfragment TopicsList on TopicConnection {\n  totalNum\n  edges {\n    node {\n      id\n      title\n      commentCount\n      viewCount\n      pinned\n      tags {\n        name\n        slug\n        __typename\n      }\n      post {\n        id\n        voteCount\n        creationDate\n        author {\n          username\n          profile {\n            userSlug\n            userAvatar\n            __typename\n          }\n          __typename\n        }\n        status\n        coinRewards {\n          ...CoinReward\n          __typename\n        }\n        __typename\n      }\n      lastComment {\n        id\n        post {\n          id\n          author {\n            username\n            profile {\n              userSlug\n              __typename\n            }\n            __typename\n          }\n          peek\n          creationDate\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    cursor\n    __typename\n  }\n  __typename\n}\n\nfragment CoinReward on ScoreNode {\n  id\n  score\n  description\n  date\n  __typename\n}\n"
+}
+
+///////////////////////////////////
+// Get details of a topic
+POST https://leetcode.com/graphql
+content-type: application/json
+
+{
+  "operationName": "DiscussTopic",
+  "variables": {
+    "topicId": 215560
+  },
+  "query": "query DiscussTopic($topicId: Int!) {\n  topic(id: $topicId) {\n    id\n    viewCount\n    topLevelCommentCount\n    subscribed\n    title\n    pinned\n    tags\n    post {\n      ...DiscussPost\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment DiscussPost on PostNode {\n  id\n  voteCount\n  voteStatus\n  content\n  updationDate\n  creationDate\n  status\n  coinRewards {\n    ...CoinReward\n    __typename\n  }\n  author {\n    isDiscussAdmin\n    isDiscussStaff\n    username\n    profile {\n      userAvatar\n      reputation\n      userSlug\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment CoinReward on ScoreNode {\n  id\n  score\n  description\n  date\n  __typename\n}\n"
+}
+
+//////////////////////////////////
+// Get comments of a topic
+POST https://leetcode.com/graphql
+content-type: application/json
+
+{
+  "operationName": "discussComments",
+  "variables": {
+    "orderBy": "newest_to_oldest",
+    "pageNo": 1,
+    "numPerPage": 10,
+    "topicId": 215560
+  },
+  "query": "query discussComments($topicId: Int!, $orderBy: String = \"newest_to_oldest\", $pageNo: Int = 1, $numPerPage: Int = 10) {\n  topicComments(topicId: $topicId, orderBy: $orderBy, pageNo: $pageNo, numPerPage: $numPerPage) {\n    data {\n      id\n      post {\n        ...DiscussPost\n        __typename\n      }\n      numChildren\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment DiscussPost on PostNode {\n  id\n  voteCount\n  voteStatus\n  content\n  updationDate\n  creationDate\n  status\n  coinRewards {\n    ...CoinReward\n    __typename\n  }\n  author {\n    isDiscussAdmin\n    isDiscussStaff\n    username\n    profile {\n      userAvatar\n      reputation\n      userSlug\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment CoinReward on ScoreNode {\n  id\n  score\n  description\n  date\n  __typename\n}\n"
+}
+
+
+//////////////////////////////////////
+// Login (email and passwd)
+// csrfmiddlewaretoken is store in set-cookie field of responce header
+// https://blog.csdn.net/Pwiling/article/details/50983832
+POST https://leetcode.com/accounts/login/
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryYbDA6S3jbQy0Ju1d
+
+------WebKitFormBoundaryYbDA6S3jbQy0Ju1d
+Content-Disposition: form-data; name="csrfmiddlewaretoken"
+
+0eBsqHnRfEKwBL4z0mIep5F0IlCPZky5NOkYrO2hUdHCTuSNstpvpvBciHSugWVz
+------WebKitFormBoundaryYbDA6S3jbQy0Ju1d
+Content-Disposition: form-data; name="login"
+
+663yan@gmail.com
+------WebKitFormBoundaryYbDA6S3jbQy0Ju1d
+Content-Disposition: form-data; name="password"
+
+myLCpasswd32@
+------WebKitFormBoundaryYbDA6S3jbQy0Ju1d
+Content-Disposition: form-data; name="next"
+
+/
+------WebKitFormBoundaryYbDA6S3jbQy0Ju1d--
+
+
+//////////////////////////////////////////
+// Login (third party)
+
+// Linkedin: https://leetcode.com/accounts/linkedin/login/
+// Google: https://leetcode.com/accounts/google/login
+// Github: https://leetcode.com/accounts/github/login/
+// Facebook: https://leetcode.com/accounts/facebook/login/
+
+
+
+
+
+
+eyJJREVOVElUWSI6IjBhYzFmOTI0MGRmOTZiMzU4NmMyMjBmYWVmNDkwNzI0IiwiUkVNT1RFX0FERFIiOiI2Ny4yNDAuNDEuMTEzIiwib2F1dGhfYXBpLmxpbmtlZGluLmNvbV9yZXF1ZXN0X3Rva2VuIjp7Im9hdXRoX3Rva2VuIjoiODYtLWY3ZGIzMGUyLWEzYTQtNGI0MS05NjQ4LTBlYzc5ZTJmZDBlZCIsIm9hdXRoX3Rva2VuX3NlY3JldCI6IjcxOTk4MzJiLTYxNTMtNDNkMy1iYjI1LWU2OTFkNmZjZDFlZCIsIm9hdXRoX2NhbGxiYWNrX2NvbmZpcm1lZCI6InRydWUiLCJ4b2F1dGhfcmVxdWVzdF9hdXRoX3VybCI6Imh0dHBzOi8vYXBpLmxpbmtlZGluLmNvbS91YXMvb2F1dGgvYXV0aG9yaXplIiwib2F1dGhfZXhwaXJlc19pbiI6IjU5OSJ9LCJvYXV0aF9hcGkubGlua2VkaW4uY29tX2FjY2Vzc190b2tlbiI6eyJvYXV0aF90b2tlbiI6ImQzZWQ5ZTZlLTc3Y2YtNDE5Ni1hYWE5LWZlODM3OGNkM2FkYiIsIm9hdXRoX3Rva2VuX3NlY3JldCI6IjRmOTkzMDUyLWQzMGYtNDM3Ny05YThmLTYwMmFjMzA4YWY5YyIsIm9hdXRoX2V4cGlyZXNfaW4iOiI1MTgzOTk5Iiwib2F1dGhfYXV0aG9yaXphdGlvbl9leHBpcmVzX2luIjoiNTE4Mzk5OSJ9LCJzb2NpYWxhY2NvdW50X3NvY2lhbGxvZ2luIjp7ImFjY291bnQiOnsiaWQiOm51bGwsInVzZXJfaWQiOm51bGwsInByb3ZpZGVyIjoibGlua2VkaW4iLCJ1aWQiOiJfc3hiZ2owRjRiIiwibGFzdF9sb2dpbiI6bnVsbCwiZGF0ZV9qb2luZWQiOm51bGwsImV4dHJhX2RhdGEiOnsiaWQiOiJfc3hiZ2owRjRiIiwiZmlyc3QtbmFtZSI6IllhbiIsImxhc3QtbmFtZSI6IlpoYW5nIiwiZW1haWwtYWRkcmVzcyI6IjY2M3lhbkBnbWFpbC5jb20iLCJwaWN0dXJlLXVybCI6Imh0dHBzOi8vbWVkaWEubGljZG4uY29tL2Rtcy9pbWFnZS9DNTYwM0FRRlpuTkNTWlJrQmRRL3Byb2ZpbGUtZGlzcGxheXBob3RvLXNocmlua18xMDBfMTAwLzA_ZT0xNTUzNzMxMjAwJnY9YmV0YSZ0PXJGS3RoRGFDTWtwT0tjNVd4SGZsUzRpYUZPblEzdEV1Q1B3X0Zxekg3UXMiLCJwaWN0dXJlLXVybHMiOnsicGljdHVyZS11cmwiOiJodHRwczovL21lZGlhLmxpY2RuLmNvbS9kbXMvaW1hZ2UvQzU2MDRBUUVpT0xtNzRwNUhhUS9wcm9maWxlLW9yaWdpbmFscGhvdG8tc2hyaW5rXzQ1MF82MDAvMD9lPTE1NTM3MzEyMDAmdj1iZXRhJnQ9X2F3NkNFdHZuSk5DdWo2S2dwVkwzcm5KQ25CX05EY0Q0Q0pPUHdIM3pzMCJ9LCJwdWJsaWMtcHJvZmlsZS11cmwiOiJodHRwOi8vd3d3LmxpbmtlZGluLmNvbS9pbi82NjN5YW4ifX0sInVzZXIiOnsiaWQiOm51bGwsInBhc3N3b3JkIjoiIWdwWkdoRkIxY2xaMlFqV29OSUl4M3o0V1Ayemg4ZDQzSUdMNmJyNDAiLCJsYXN0X2xvZ2luIjpudWxsLCJpc19zdXBlcnVzZXIiOmZhbHNlLCJ1c2VybmFtZSI6IiIsImZpcnN0X25hbWUiOiJZYW4iLCJsYXN0X25hbWUiOiJaaGFuZyIsImVtYWlsIjoiNjYzeWFuQGdtYWlsLmNvbSIsImlzX3N0YWZmIjpmYWxzZSwiaXNfYWN0aXZlIjp0cnVlLCJkYXRlX2pvaW5lZCI6IjIwMTktMDEtMjBUMDA6MzQ6MDEuNDEwWiJ9LCJzdGF0ZSI6eyJuZXh0IjoiLyIsInByb2Nlc3MiOiJsb2dpbiIsInNjb3BlIjoiIiwiYXV0aF9wYXJhbXMiOiIifSwiZW1haWxfYWRkcmVzc2VzIjpbeyJpZCI6bnVsbCwidXNlcl9pZCI6bnVsbCwiZW1haWwiOiI2NjN5YW5AZ21haWwuY29tIiwidmVyaWZpZWQiOmZhbHNlLCJwcmltYXJ5Ijp0cnVlfV0sInRva2VuIjp7ImlkIjpudWxsLCJhcHBfaWQiOjMsImFjY291bnRfaWQiOm51bGwsInRva2VuIjoiZDNlZDllNmUtNzdjZi00MTk2LWFhYTktZmU4Mzc4Y2QzYWRiIiwidG9rZW5fc2VjcmV0IjoiNGY5OTMwNTItZDMwZi00Mzc3LTlhOGYtNjAyYWMzMDhhZjljIiwiZXhwaXJlc19hdCI6bnVsbH19LCJzb2NpYWxhY2NvdW50X3N0YXRlIjpbeyJuZXh0IjoiL3Byb2JsZW1zIiwicHJvY2VzcyI6ImxvZ2luIiwic2NvcGUiOiIiLCJhdXRoX3BhcmFtcyI6IiJ9LCJFak52TVIyTlFLdHkiXX0
+
+
+
+csrfmiddlewaretoken: 0eBsqHnRfEKwBL4z0mIep5F0IlCPZky5NOkYrO2hUdHCTuSNstpvpvBciHSugWVz
+login: 663yan@gmail.com
+password: myLCpasswd32@
+next: /
+
+/////////////////////////////////////
+//// NEEDS LOGIN
+////////////////////////////////////
+
+/////////////////////////////////////
+// Run code
+POST https://leetcode.com/problems/count-complete-tree-nodes/interpret_solution/
+content-type: application/json
+
+{
+  "question_id": "222",
+  "data_input": "[1,2,3,4,5,6]",
+  "lang": "python3",
+  "typed_code": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.left = None\n#         self.right = None\n\nclass Solution:\n    def countNodes(self, root):\n        \"\"\"\n        :type root: TreeNode\n        :rtype: int\n        \"\"\"\n        ",
+  "judge_type": "large"
+}
+
+//Responce
+{
+  "interpret_id": "interpret_1547942342.3287244_F0d1ZMVTg3",
+  "test_case": "[1,2,3,4,5,6]",
+  "interpret_expected_id": "interpret_expected_1547941939.6720486_ClXmhBvbZe"
+}
+
+/////////////////////////////////////
+// Check if run code finished (polling)
+
+// Code running output
+GET https://leetcode.com/submissions/detail/interpret_1547942342.3287244_F0d1ZMVTg3/check/
+
+// Expected Expecouted putput
+GET https://leetcode.com/submissions/detail/interpret_expected_1547941939.6720486_ClXmhBvbZe/check/
+
+
+
+////////////////////////////////////
+// Submit code
+POST https://leetcode.com/problems/count-complete-tree-nodes/submit/
+content-type: application/json
+
+{
+  "question_id": "222",
+  "lang": "python3",
+  "typed_code": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.left = None\n#         self.right = None\n\nclass Solution:\n    def countNodes(self, root):\n        \"\"\"\n        :type root: TreeNode\n        :rtype: int\n        \"\"\"\n        print(\"haha\")"
+}
+
+//Responce
+{
+  "submission_id": 202319283
+}
+
+//////////////////////////////////////////////
+// Check if submission result ready (polling)
+GET https://leetcode.com/submissions/detail/202319283/check/
