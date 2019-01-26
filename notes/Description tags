@@ -1,0 +1,9 @@
+<p>:    Nomal text
+<code>: Inline code
+<strong>:   strong
+<ol><ul><li>: list
+<pre>:  Code block, contains mutiple tags: 
+    <strong>, 
+    <span> with id example-input and example-output,
+
+<img>
