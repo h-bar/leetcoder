@@ -181,14 +181,8 @@ class HtmlParser {
       }
 
       String finalText = trimStringHtml(node.text);
-      //Temp fix for https://github.com/flutter/flutter/issues/736
-      if (finalText.endsWith(" ")) {
-        return Container(
-            padding: EdgeInsets.only(right: 2.0), child: Text(finalText));
-      } else {
         return Text(finalText);
       }
-    }
     return Wrap();
   }
 
