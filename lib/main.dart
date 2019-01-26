@@ -106,7 +106,7 @@ class ProblemPageState extends State<ProblemPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Startup Name Generator'), 
+        title: Text('Problem Detail'), //TODO: change to problem title 
       ),
       body: Container(
         child: Center(
