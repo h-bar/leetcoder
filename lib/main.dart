@@ -45,6 +45,10 @@ class ProblemListState extends State<ProblemList> {
       ),
     );
   }
+  @override
+  void initState() {
+    _loadProblems();
+  }
 
   Future<void> _loadProblems() async {
     var url = "https://leetcode.com/api/problems/all";
@@ -118,6 +122,11 @@ class ProblemPageState extends State<ProblemPage> {
       ),
     );
   }
+
+  @override
+  void initState() {
+    _refreshProblem();
+  } 
 
   Future<void> _refreshProblem() async {
     var url = "https://leetcode.com/graphql";
