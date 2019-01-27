@@ -11,8 +11,6 @@ class Html extends StatelessWidget {
     this.backgroundColor,
     this.defaultTextStyle = const TextStyle(color: Colors.black),
     this.onLinkTap,
-    this.renderNewlines = false,
-    this.customRender,
   }) : super(key: key);
 
   final String data;
@@ -20,29 +18,22 @@ class Html extends StatelessWidget {
   final Color backgroundColor;
   final TextStyle defaultTextStyle;
   final OnLinkTap onLinkTap;
-  final bool renderNewlines;
-
-  /// Either return a custom widget for specific node types or return null to
-  /// fallback to the default rendering.
-  final CustomRender customRender;
 
   @override
   Widget build(BuildContext context) {
-    final double width = MediaQuery.of(context).size.width;
-
+    // final double width = MediaQuery.of(context).size.width;
+    final double width = 600;
     return Container(
       padding: padding,
       color: backgroundColor,
       width: width,
       child: DefaultTextStyle.merge(
         style: defaultTextStyle,
-        child: Wrap(
-          alignment: WrapAlignment.start,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: HtmlParser(
             width: width,
             onLinkTap: onLinkTap,
-            renderNewlines: renderNewlines,
-            customRender: customRender,
           ).parse(data),
         ),
       ),
