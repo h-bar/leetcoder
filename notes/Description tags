@@ -1,6 +1,7 @@
 <p>:    Nomal text
-<code>: Inline code
+<code>: Inline code 
 <strong>:   strong
+<i>: Italian
 <ol><ul><li>: list
 <pre>:  Code block, contains mutiple tags: 
     <strong>, 
