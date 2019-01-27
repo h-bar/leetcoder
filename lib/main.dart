@@ -50,7 +50,7 @@ class ProblemListState extends State<ProblemList> {
     _loadProblems();
   }
 
-  Future<void> _loadProblems() async {
+  Future<void> _loadProblems() async { //TODO: Cache problem list and descriptions
     var url = "https://leetcode.com/api/problems/all";
     http.get(url)
     .then((response) {
@@ -110,7 +110,7 @@ class ProblemPageState extends State<ProblemPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Problem Detail'), //TODO: change to problem title 
+        title: Text(this.problemSlug), //TODO: change to problem title 
       ),
       body: Container(
         child: Center(
