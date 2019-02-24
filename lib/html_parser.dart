@@ -55,7 +55,7 @@ class HtmlParser {
   };
 
   List<Widget> parse(String data) {
-    data = data.replaceAll('\r\n', '');
+    data = data.replaceAll('\r\n\r\n', '');
     dom.DocumentFragment document = parser.parseFragment(data);
     List<Widget> widgeList = _parseNodeList(document.nodes);
     // debugDumpApp();
