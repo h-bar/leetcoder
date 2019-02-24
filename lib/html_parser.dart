@@ -55,8 +55,11 @@ class HtmlParser {
   };
 
   List<Widget> parse(String data) {
+    data = data.replaceAll('\r\n', '');
     dom.DocumentFragment document = parser.parseFragment(data);
-    return _parseNodeList(document.nodes);
+    List<Widget> widgeList = _parseNodeList(document.nodes);
+    // debugDumpApp();
+    return widgeList;
   }
 
   bool isTextNode(dom.Node node) {
