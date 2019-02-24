@@ -14,23 +14,7 @@ class HtmlParser {
   final double width;
   final OnLinkTap onLinkTap;
 
-  static const _supportedElements = [
-    "body",
-    "br",
-    "code",
-    "div",
-    "em",
-    "img",
-    "li",
-    "ol", //partial
-    "p",
-    "pre",
-    "span",
-    "strong",
-    "ul", //partial
-    "a",
-  ];
-  final Map<String, TextStyle> styleSheet = {
+  final Map<String, TextStyle> textStyleSheet = {
     "text": const TextStyle(
       color: Colors.black,
     ),
@@ -39,6 +23,10 @@ class HtmlParser {
       fontWeight: FontWeight.bold,
     ),
     "em": const TextStyle(
+      color: Colors.black,
+      fontStyle: FontStyle.italic,
+    ),
+    "i": const TextStyle(
       color: Colors.black,
       fontStyle: FontStyle.italic,
     ),
@@ -59,7 +47,7 @@ class HtmlParser {
       fontFamily: 'monospace',
       color: Colors.blueGrey,
     ),
-    "link": const TextStyle(
+    "a": const TextStyle(
       decoration: TextDecoration.underline,
       color: Colors.blueAccent,
       decorationColor: Colors.blueAccent
@@ -71,149 +59,59 @@ class HtmlParser {
     return _parseNodeList(document.nodes);
   }
 
+  bool isTextNode(dom.Node node) {
+    return node is dom.Text || textStyleSheet.containsKey((node as dom.Element).localName);
+  }
+
+  bool isImgNode(dom.Node node) {
+    return node is dom.Element && node.localName == 'img';
+  }
+
   List<Widget> _parseNodeList(List<dom.Node> nodeList) {
     List<Widget> widgetList = List<Widget>();
-    for (dom.Node node in nodeList) {
-      if(node is dom.Element) {
-        switch (node.localName) {
-          case 'p':
-            widgetList.add(_parseTextNodes(node.nodes));
-            break;
-          case 'img':
-            widgetList.add(_parseImgNode(node));
-            break; 
-          case 'pre':
-            widgetList.add(_parsePreNodes(node.nodes));
-            break;
-          default:
-            widgetList.addAll(_parseNodeList(node.nodes));
+    Iterator<dom.Node> nodeItr = nodeList.iterator;
+    nodeItr.moveNext();
+    dom.Node currentNode = nodeItr.current;
+    while(currentNode != null) {
+      if (isTextNode(currentNode)) {
+        List<TextSpan> textSpans = List<TextSpan>();
+        while(currentNode != null && isTextNode(currentNode)) {
+          String text = '';
+          String styleKey = '';
+          if (currentNode is dom.Text) {
+            text = currentNode.text;
+            styleKey = 'text';
+          } else if (currentNode is dom.Element) {
+            text = currentNode.innerHtml;
+            styleKey = currentNode.localName;
+          }
+
+          textSpans.add(TextSpan(
+            text: text,
+            style: textStyleSheet[styleKey],
+          ));
+
+          nodeItr.moveNext();
+          currentNode = nodeItr.current;
         }
-      }
+
+        widgetList.add(RichText(
+          text: TextSpan(
+            children: textSpans,
+          ),
+        ));
+      } else if (isImgNode(currentNode)) {
+        widgetList.add(Image.network(currentNode.attributes['src']));
+        nodeItr.moveNext();
+        currentNode = nodeItr.current;   
+      } else {
+        widgetList.add(Wrap(
+          children: _parseNodeList(currentNode.nodes)
+          ));
+        nodeItr.moveNext();
+        currentNode = nodeItr.current;   
+      }  
     }
     return widgetList;
   }
-
-  RichText _parseTextNodes(List<dom.Node> nodeList) {
-    List<TextSpan> textDisplay = List<TextSpan>();
-    for (dom.Node node in nodeList) {
-      String textStyleKey = 'text';
-      if (node is dom.Element) {
-        textStyleKey = node.localName;
-      }
-
-      textDisplay.add(TextSpan(
-        text: node.text,
-        style: styleSheet[textStyleKey],
-      ));
-    }
-
-    return RichText(
-      text: TextSpan(
-      children: textDisplay
-    ));
-  }
-  Image _parseImgNode(dom.Node node) {
-    return Image.network(node.attributes['src']);
-  }
-  
-  // TODO: Finish the pre part
-  Wrap _parsePreNodes(List<dom.Node> nodes) {
-    return Wrap();
-  }
-  
-  
-  
-  
-  // Widget _parseNode(dom.Element node) {
-  //   String nodeType = node.localName;
-  //   if (styleSheet[nodeType] != null) {
-  //     return Text(
-  //         node.text,
-  //         style: styleSheet[nodeType],
-  //       ); 
-  //   }
-
-  //   switch (node.localName) {
-  //     case "img":
-  //       return Image.network(node.attributes['src']);
-  //     case "br":
-  //       return Divider(
-  //         height: 0,
-  //         color: Colors.transparent,
-  //       );
-  //     case "a":
-  //       return GestureDetector(
-  //         child: Text(
-  //           node.text,
-  //           style: styleSheet["link"],
-  //         ),
-  //         onTap: () {
-  //           if (node.attributes['href'] != null && onLinkTap != null) {
-  //             String url = node.attributes['href'];
-  //             onLinkTap(url);
-  //           }
-  //         });
-  //   }
-
-  //   if (["body", "div"].contains(nodeType)) {
-  //     return Container(
-  //       width: width,
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: _parseNodeList(node.nodes),
-  //       ),
-  //     );
-  //   }
-  
-  //   if(nodeType == "pre") {
-  //     List<dom.Node> strongList = List<dom.Node>();
-
-  //     for (dom.Node tmpNode in node.nodes) {
-  //       if (tmpNode is dom.Element && tmpNode.localName == 'strong') {
-  //         strongList.add(tmpNode);
-  //       }
-  //     }
-
-  //     if (strongList.isNotEmpty) {
-  //       for (dom.Node tmpNode in strongList.getRange(1, strongList.length)) {
-  //         node.insertBefore(dom.Element.tag('br'), tmpNode);
-  //       }
-  //     }
-  //     return Wrap(
-  //       children: _parseNodeList(node.nodes),
-  //       );
-  //   }
-
-  //   if (["ol", "ul"].contains(nodeType)) {
-  //     return Column(
-  //       children: _parseNodeList(node.nodes),
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //     );
-  //   }
-
-  //   if (nodeType == "p") {
-  //     return Wrap(
-  //         children: _parseNodeList(node.nodes),
-  //     );
-  //   }
-
-  //   if (nodeType == "li") {
-  //     String type = node.parent.localName;
-  //     const EdgeInsets markPadding = EdgeInsets.symmetric(horizontal: 4.0);
-  //     String markText = type == "ol" ? '${node.parent.children.indexOf(node) + 1}.' : '•'; 
-  //     Widget mark = Container(child: Text(markText), padding: markPadding);
-
-  //     return Container(
-  //       width: width,
-  //       child: Wrap(
-  //         children: <Widget>[
-  //           mark,
-  //           Wrap(children: _parseNodeList(node.nodes))
-  //         ],
-  //       ),
-  //     );
-  //   }
-
-  //   return Wrap();
-  // }
 }
