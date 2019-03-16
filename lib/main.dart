@@ -218,10 +218,49 @@ Widget htmlParse(String data) {
     dom.DocumentFragment document = parser.parseFragment(data);
     List<Widget> widgeList = _parseNodeList(document.nodes);
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: widgeList,
       );}
 
+bool _isNonBlockingText(dom.Element node) {
+  return (node is dom.Text) || (node is dom.Element && ['code', 'strong', 'span', 'i'].contains(node.localName));
+}
+
 List<Widget> _parseNodeList(dom.NodeList nodes) {
-  List<Widget> wightList = List<Widget>();
-  return wightList;
+  List<Widget> widghtList = List<Widget>();
+  List<TextSpan> textDisplay = List<TextSpan>();
+  while(nodes.isNotEmpty) {
+    dom.Node node = nodes.removeAt(0);
+    if (node is dom.Text) {
+      textDisplay.add(TextSpan(text: node.text));
+      continue;
+    }
+    
+    if (!(node is dom.Element)) {
+      continue;
+    }
+
+    dom.NodeList nodesHolder = node.nodes;
+    nodesHolder.addAll(nodes);
+    nodes = nodesHolder;
+
+    if (!_isNonBlockingText(node) && textDisplay.isNotEmpty) {
+      widghtList.add(RichText(
+        text: TextSpan(
+          style:TextStyle(color: Colors.black),
+          children: List.from(textDisplay)),));
+      textDisplay.clear();
+    }
+
+
+    dom.Element nodeE = node as dom.Element;
+    String node_tag = nodeE.localName;
+
+    if (node_tag == 'img') {
+      widghtList.add(Image.network(
+        node.attributes['src'] 
+        ));
+    }
+  }
+  return widghtList;
 }
