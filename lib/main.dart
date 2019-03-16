@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'flutter_html.dart';
+import 'package:html/dom.dart' as dom;
+import 'package:html/parser.dart' as parser;
 
 void main() => runApp(MyApp());
 
@@ -206,9 +207,21 @@ class ProblemPageState extends State<ProblemPage> {
   Widget _buildProblemPage() {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      child: Html(
-        data: this._problemDesc ?? ''
-      )
+      child: htmlParse(this._problemDesc ?? '<div/>')
     );
   }
+}
+
+
+Widget htmlParse(String data) {
+    data = data.replaceAll('\r\n\r\n', '');
+    dom.DocumentFragment document = parser.parseFragment(data);
+    List<Widget> widgeList = _parseNodeList(document.nodes);
+    return Column(
+      children: widgeList,
+      );}
+
+List<Widget> _parseNodeList(dom.NodeList nodes) {
+  List<Widget> wightList = List<Widget>();
+  return wightList;
 }
