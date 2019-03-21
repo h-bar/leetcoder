@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
+
+import 'dart:convert';
 
 void main() => runApp(MyApp());
 
@@ -207,7 +207,7 @@ class ProblemPageState extends State<ProblemPage> {
   Widget _buildProblemPage() {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      child: htmlParse(this._problemDesc ?? '<div/>')
+      child: htmlParse(this._problemDesc ?? '')
     );
   }
 }
@@ -215,52 +215,115 @@ class ProblemPageState extends State<ProblemPage> {
 
 Widget htmlParse(String data) {
     data = data.replaceAll('\r\n\r\n', '');
-    dom.DocumentFragment document = parser.parseFragment(data);
-    List<Widget> widgeList = _parseNodeList(document.nodes);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: widgeList,
-      );}
-
-bool _isNonBlockingText(dom.Element node) {
-  return (node is dom.Text) || (node is dom.Element && ['code', 'strong', 'span', 'i'].contains(node.localName));
+    dom.Document document = parser.parse(data);
+    Widget widgeList = _parseNode(document.body);
+    return widgeList;
 }
 
-List<Widget> _parseNodeList(dom.NodeList nodes) {
-  List<Widget> widghtList = List<Widget>();
-  List<TextSpan> textDisplay = List<TextSpan>();
-  while(nodes.isNotEmpty) {
-    dom.Node node = nodes.removeAt(0);
-    if (node is dom.Text) {
-      textDisplay.add(TextSpan(text: node.text));
-      continue;
-    }
-    
-    if (!(node is dom.Element)) {
-      continue;
-    }
+final Map<String, TextStyle> textStyleSheet = {
+    "strong": const TextStyle(
+      color: Colors.black,
+      fontWeight: FontWeight.bold,
+    ),
+    "em": const TextStyle(
+      color: Colors.black,
+      fontStyle: FontStyle.italic,
+    ),
+    "i": const TextStyle(
+      color: Colors.black,
+      fontStyle: FontStyle.italic,
+    ),
+    "font": const TextStyle(
+      color: Colors.black,
+      fontFamily: 'monospace',
+    ),
+    "b": const TextStyle(
+      color: Colors.black,
+      fontWeight: FontWeight.bold,
+    ),
+    "code": TextStyle(
+      fontFamily: 'monospace',
+      color: Colors.blueGrey,
+      background: Paint()..color = Colors.grey[100],
+    ),
+    "span": TextStyle(
+      fontFamily: 'monospace',
+      color: Colors.blueGrey,
+    ),
+    "a": const TextStyle(
+      decoration: TextDecoration.underline,
+      color: Colors.blueAccent,
+      decorationColor: Colors.blueAccent
+    )
+  };
 
-    dom.NodeList nodesHolder = node.nodes;
-    nodesHolder.addAll(nodes);
-    nodes = nodesHolder;
 
-    if (!_isNonBlockingText(node) && textDisplay.isNotEmpty) {
-      widghtList.add(RichText(
+bool _isInlineText(dom.Node node) {
+  return (node is dom.Text) || (node is dom.Element && textStyleSheet.keys.contains(node.localName));
+}
+
+
+TextSpan _parseInLineNode(dom.Node node) {
+  if (node is dom.Text) {
+    return TextSpan(text: node.text);
+  }
+  
+  dom.Element nodeE = node as dom.Element;
+  List<TextSpan> textSpan = List<TextSpan>();
+  for (dom.Node nextNode in node.nodes) {
+    textSpan.add(_parseInLineNode(nextNode));
+  }
+  return TextSpan(
+    children: textSpan,
+    style: textStyleSheet[nodeE.localName],
+  );
+}
+
+Widget _parseNode(dom.Node node) {
+  if (!(node is dom.Element)) {
+    return null;
+  }
+
+  dom.Element nodeE = node as dom.Element;
+  dom.NodeList children = nodeE.nodes;
+  String nodeTag = nodeE.localName;
+
+  if (nodeTag == 'img') {
+    return Image.network(
+      node.attributes['src'] 
+    );
+  }
+
+  if (children.isEmpty) {
+    return null;
+  }
+
+  List<Widget> childWidgets = List<Widget>();
+  for (dom.Node nextNode in nodeE.nodes) {
+    if (_isInlineText(nextNode)) {
+      List<TextSpan> textSpans = List<TextSpan>();
+      if (childWidgets.isNotEmpty && childWidgets.last is RichText) {
+        textSpans.addAll((childWidgets.removeLast() as RichText).text.children);
+      }
+      textSpans.add(_parseInLineNode(nextNode));
+      childWidgets.add(RichText(
         text: TextSpan(
-          style:TextStyle(color: Colors.black),
-          children: List.from(textDisplay)),));
-      textDisplay.clear();
+          children: textSpans, 
+          style: TextStyle(color: Colors.black)
+          ),
+        textAlign: TextAlign.left,
+      ));
     }
-
-
-    dom.Element nodeE = node as dom.Element;
-    String node_tag = nodeE.localName;
-
-    if (node_tag == 'img') {
-      widghtList.add(Image.network(
-        node.attributes['src'] 
-        ));
+    else {
+      Widget nextNodeWidget = _parseNode(nextNode);
+      if (nextNodeWidget != null) {
+        childWidgets.add(nextNodeWidget);
+      }
     }
   }
-  return widghtList;
+
+  return Column(
+    children: childWidgets,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    );
 }
