@@ -51,6 +51,7 @@ Future<Map<String, dynamic>> _getProblemDescriptor(String contentType, String co
                       hints
                       solution {
                         id
+                          content
                         canSeeDetail
                         __typename
                       }
