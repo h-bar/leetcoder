@@ -29,27 +29,11 @@ Future<Map<String, dynamic>> _getProblemDescriptor(String contentType, String co
       },
       "query": '''query questionData(\$titleSlug: String!) {
                     question(titleSlug: \$titleSlug) {
-                      questionId
-                      questionFrontendId
-                      boundTopicId
-                      title
-                      titleSlug
                       content
-                      translatedTitle
-                      translatedContent
-                      isPaidOnly
                       difficulty
                       likes
                       dislikes
                       isLiked
-                      similarQuestions
-                      contributors {
-                        username
-                        profileUrl
-                        avatarUrl
-                        __typename
-                      }
-                      langToValidPlayground
                       topicTags {
                         name
                         slug
@@ -70,15 +54,6 @@ Future<Map<String, dynamic>> _getProblemDescriptor(String contentType, String co
                         canSeeDetail
                         __typename
                       }
-                      status
-                      sampleTestCase
-                      metaData
-                      judgerAvailable
-                      judgeType
-                      mysqlSchemas
-                      enableRunCode
-                      enableTestMode
-                      envInfo
                       __typename
                     }
                   }'''
