@@ -50,7 +50,7 @@ class ProblemListState extends State<ProblemList> {
   }
 
   Future<void> _loadProblems({refresh = false}) async {
-    loadContent('problemList', refresh)
+    loadContent('problemList', 'problemList', refresh)
     .then((data) {
       setState(() {
         _problems = data['stat_status_pairs'];
@@ -134,7 +134,7 @@ class ProblemPageState extends State<ProblemPage> {
   }
 
   Future<void> _loadProblemDetail({refresh = false}) async {
-    loadContent(this.problemDetails['titleSlug'], refresh)
+    loadContent('problemDetail', this.problemDetails['titleSlug'], refresh)
     .then((content) {
       var problemDetail = content['data']['question'];
       setState(() {
