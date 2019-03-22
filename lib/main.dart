@@ -89,7 +89,12 @@ class ProblemListState extends State<ProblemList> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ProblemPage(problemSlug: _titleSlug)),
+          MaterialPageRoute(builder: (context) => ProblemPage(problemDetails:  {
+            'id': _id,
+            'titleSlug': _titleSlug,
+            'displayTitle':_displayTitle,
+            'diffculty':_diffculty
+          })),
         );
       },
     );
@@ -97,21 +102,20 @@ class ProblemListState extends State<ProblemList> {
 }
 
 class ProblemPage extends StatefulWidget {
-  final String problemSlug;
-  ProblemPage({Key key, @required this.problemSlug}) : super(key: key);
+  final Map<String, dynamic> problemDetails;
+  ProblemPage({Key key, @required this.problemDetails}) : super(key: key);
   @override
-  ProblemPageState createState() => new ProblemPageState(problemSlug: this.problemSlug);
+  ProblemPageState createState() => new ProblemPageState(problemDetails: this.problemDetails);
 }
-
 class ProblemPageState extends State<ProblemPage> {
-  final String problemSlug;
+  final Map<String, dynamic> problemDetails;
   String _problemDesc;
-  ProblemPageState({@required this.problemSlug});
+  ProblemPageState({@required this.problemDetails});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(this.problemSlug), //TODO: change to problem title 
+        title: Text(this.problemDetails['displayTitle']),
       ),
       body: Container(
         child: Center(
@@ -127,7 +131,7 @@ class ProblemPageState extends State<ProblemPage> {
   @override
   void initState() {
     _loadProblemDetail();
-  } 
+  }
 
   Future<void> _loadProblemDetail({refresh = false}) async {
     loadContent(this.problemDetails['titleSlug'], refresh)
