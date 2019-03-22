@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 import 'html_render.dart';
+import 'content_loder.dart';
+
 
 void main() => runApp(MyApp());
 
@@ -37,7 +38,7 @@ class ProblemListState extends State<ProblemList> {
         child: Center(
           child: RefreshIndicator(
             child: _buildProblemList(),
-            onRefresh: _loadProblems,
+            onRefresh: _refreshProblems,
           ) 
         ),
       ),
@@ -48,16 +49,18 @@ class ProblemListState extends State<ProblemList> {
     _loadProblems();
   }
 
-  Future<void> _loadProblems() async { //TODO: Cache problem list and descriptions
-    var url = "https://leetcode.com/api/problems/all";
-    http.get(url)
-    .then((response) {
-      Map<String, dynamic> responseBody = jsonDecode(response.body);
+  Future<void> _loadProblems({refresh = false}) async {
+    loadContent('problemList', refresh)
+    .then((data) {
       setState(() {
-        _problems = responseBody['stat_status_pairs'];
-        print('Problem list Refreshed');
+        _problems = data['stat_status_pairs'];
+        print('Data loaded from local cache');
       });
     });
+  }
+
+  Future<void> _refreshProblems() async {
+    _loadProblems(refresh: true);
   }
 
   Widget _buildProblemList() {
@@ -123,82 +126,21 @@ class ProblemPageState extends State<ProblemPage> {
 
   @override
   void initState() {
-    _refreshProblem();
+    _loadProblemDetail();
   } 
 
-  Future<void> _refreshProblem() async {
-    var url = "https://leetcode.com/graphql";
-    var headers = {"Content-Type": "application/json"};
-    var body = jsonEncode({
-      "operationName": "questionData",
-      "variables": {
-        "titleSlug": "${this.problemSlug}"
-      },
-      "query": '''query questionData(\$titleSlug: String!) {
-                          question(titleSlug: \$titleSlug) {
-                            questionId
-                            questionFrontendId
-                            boundTopicId
-                            title
-                            titleSlug
-                            content
-                            translatedTitle
-                            translatedContent
-                            isPaidOnly
-                            difficulty
-                            likes
-                            dislikes
-                            isLiked
-                            similarQuestions
-                            contributors {
-                              username
-                              profileUrl
-                              avatarUrl
-                              __typename
-                            }
-                            langToValidPlayground
-                            topicTags {
-                              name
-                              slug
-                              translatedName
-                              __typename
-                            }
-                            companyTagStats
-                            codeSnippets {
-                              lang
-                              langSlug
-                              code
-                              __typename
-                            }
-                            stats
-                            hints
-                            solution {
-                              id
-                              canSeeDetail
-                              __typename
-                            }
-                            status
-                            sampleTestCase
-                            metaData
-                            judgerAvailable
-                            judgeType
-                            mysqlSchemas
-                            enableRunCode
-                            enableTestMode
-                            envInfo
-                            __typename
-                          }
-                        }'''
-    });
-    http.post(url, body: body, headers: headers)
-    .then((response) {
-      Map<String, dynamic> responseBody = jsonDecode(response.body);
-      var problemDetail = responseBody['data']['question'];
-      print('Problem details fetched');
+  Future<void> _loadProblemDetail({refresh = false}) async {
+    loadContent(this.problemDetails['titleSlug'], refresh)
+    .then((content) {
+      var problemDetail = content['data']['question'];
       setState(() {
         this._problemDesc = problemDetail['content'];
       });
     });
+  }
+
+  Future<void> _refreshProblem() async {
+    _loadProblemDetail(refresh: true);
   }
 
   Widget _buildProblemPage() {
@@ -207,6 +149,4 @@ class ProblemPageState extends State<ProblemPage> {
       child: htmlParse(this._problemDesc ?? '')
     );
   }
-}
-
 }
