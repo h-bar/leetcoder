@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as p;
 
 Future<String> _fetchContent(String contentId) async {
