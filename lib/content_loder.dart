@@ -23,42 +23,42 @@ Future<Map<String, dynamic>> _getProblemDescriptor(String contentType, String co
       contentRequest = http.Request('POST', url);
       contentRequest.headers.addAll({"Content-Type": "application/json"});
       contentRequest.body = jsonEncode({
-      "operationName": "questionData",
-      "variables": {
-        "titleSlug": "$contentId"
-      },
-      "query": '''query questionData(\$titleSlug: String!) {
-                    question(titleSlug: \$titleSlug) {
-                      content
-                      difficulty
-                      likes
-                      dislikes
-                      isLiked
-                      topicTags {
-                        name
-                        slug
-                        translatedName
-                        __typename
-                      }
-                      companyTagStats
-                      codeSnippets {
-                        lang
-                        langSlug
-                        code
-                        __typename
-                      }
-                      stats
-                      hints
-                      solution {
-                        id
+        "operationName": "questionData",
+        "variables": {
+          "titleSlug": "$contentId"
+        },
+        "query": '''query questionData(\$titleSlug: String!) {
+                      question(titleSlug: \$titleSlug) {
+                        content
+                        difficulty
+                        likes
+                        dislikes
+                        isLiked
+                        topicTags {
+                          name
+                          slug
+                          translatedName
+                          __typename
+                        }
+                        companyTagStats
+                        codeSnippets {
+                          lang
+                          langSlug
+                          code
+                          __typename
+                        }
+                        stats
+                        hints
+                        solution {
+                          id
                           content
-                        canSeeDetail
+                          canSeeDetail
+                          __typename
+                        }
                         __typename
                       }
-                      __typename
-                    }
-                  }'''
-    });
+                    }'''
+      });
       break;
     default:
   }
@@ -69,7 +69,7 @@ Future<Map<String, dynamic>> _getProblemDescriptor(String contentType, String co
     'contentFilePath': contentFilePath,
     'contentRequest': contentRequest
   };
-  
+
   return contentDescriptor;
 }
 Future<String> _fetchContent(String contentType, String contentId) async {

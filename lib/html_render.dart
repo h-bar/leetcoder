@@ -4,10 +4,10 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
 
 Widget htmlParse(String data) {
-    data = data.replaceAll('\r\n\r\n', '');
-    dom.Document document = parser.parse(data);
-    Widget widgeList = _parseNode(document.body);
-    return widgeList;
+  data = data.replaceAll('\r\n\r\n', '');
+  dom.Document document = parser.parse(data);
+  Widget widgeList = _parseNode(document.body);
+  return widgeList;
 }
 
 final Map<String, TextStyle> textStyleSheet = {
