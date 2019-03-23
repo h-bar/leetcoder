@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
+import 'package:markdown/markdown.dart';
 
 Widget htmlParse(String data) {
   data = data.replaceAll('\r\n\r\n', '');
@@ -10,6 +11,10 @@ Widget htmlParse(String data) {
   return widgeList;
 }
 
+Widget markdownParser(String data) {
+  data = data.replaceAll('[TOC]', '');
+  return htmlParse(markdownToHtml(data));
+}
 final Map<String, TextStyle> textStyleSheet = {
     "strong": const TextStyle(
       color: Colors.black,

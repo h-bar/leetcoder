@@ -110,6 +110,7 @@ class ProblemPage extends StatefulWidget {
 class ProblemPageState extends State<ProblemPage> {
   final Map<String, dynamic> problemDetails;
   String _problemDesc;
+  String _problemSolution;
   ProblemPageState({@required this.problemDetails});
   @override
   Widget build(BuildContext context) {
@@ -136,9 +137,11 @@ class ProblemPageState extends State<ProblemPage> {
   Future<void> _loadProblemDetail({refresh = false}) async {
     loadContent('problemDetail', this.problemDetails['titleSlug'], refresh)
     .then((content) {
-      var problemDetail = content['data']['question'];
+      var problemDetails = content['data']['question'];
       setState(() {
-        this._problemDesc = problemDetail['content'];
+        this._problemDesc = problemDetails['content'];
+        this._problemSolution = problemDetails['solution'] != null ? problemDetails['solution']['content'] : null;
+        // this._problemSolution = problemDetails['solution'] != null ? problemDetails['solution']['__typename'] : null;
       });
     });
   }
@@ -150,7 +153,12 @@ class ProblemPageState extends State<ProblemPage> {
   Widget _buildProblemPage() {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      child: htmlParse(this._problemDesc ?? '')
+      child: Column(
+        children: <Widget>[
+          htmlParse(this._problemDesc ?? '<p>Loading...<p/>'), 
+          markdownParser(this._problemSolution ?? '**No Solution Available**') 
+        ],
+      )
     );
   }
 }
