@@ -29,6 +29,18 @@ content-type: application/json
   "query": "query QuestionNote($titleSlug: String!) {\n  question(titleSlug: $titleSlug) {\n    questionId\n    article\n    solution {\n      id\n      url\n      content\n      contentTypeId\n      canSeeDetail\n      rating {\n        id\n        count\n        average\n        userRating {\n          score\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"
 }
 
+/////////////////////////////////
+// Get solution code (if exist)
+POST https://leetcode.com/graphql
+content-type: application/json
+
+{
+  "operationName":"fetchPlayground",
+  "variables":{},
+  "query":"query fetchPlayground {\n  playground(uuid: \"9yZ96Kwf\") {\n    testcaseInput\n    name\n    isUserOwner\n    isLive\n    showRunCode\n    showOpenInPlayground\n    selectedLangSlug\n    isShared\n    __typename\n  }\n  allPlaygroundCodes(uuid: \"9yZ96Kwf\") {\n    code\n    langSlug\n    __typename\n  }\n}\n"
+}
+
+
 
 ///////////////////////////////
 // Get a certain problem submission status("count-complete-tree-nodes")
@@ -196,3 +208,4 @@ content-type: application/json
 //////////////////////////////////////////////
 // Check if submission result ready (polling)
 GET https://leetcode.com/submissions/detail/202319283/check/
+
