@@ -3,56 +3,59 @@ import 'dart:io' as io;
 import 'package:http/http.dart' as http;
 import 'package:markdown/markdown.dart' as markdown;
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
+import 'package:path_provider/path_provider.dart' as pp;
 
-Future<String> _fetchContent(http.Request request) {
-  return request.send()
-  .then((resp) {
-    return resp.stream.toStringStream().join();
-  });
-}
+class ContentLoader {
+  String appRootPath;
+  Future<void> inited;
+  ContentLoader() {
+    this.inited = pp.getApplicationDocumentsDirectory()
+    .then((dir) {
+      return this.appRootPath = dir.absolute.path; 
+    });
 
-Future<String> _loadContent(io.File file) {
-  return file.readAsString().asStream().join();
-}
+    // this.appRootPath = path.current;
+  }
 
-Future<void> _cacheContent(io.File file, String content) {
-  return file.writeAsString(content);
-}
+  Future<String> _fetchContent(http.Request request) {
+    return request.send()
+    .then((resp) {
+      return resp.stream.toStringStream().join();
+    });
+  }
 
-Future<Map<String, dynamic>> _load(String cacheFileName, http.Request request, refresh) async {
-  // io.Directory _appDocDir = io.Directory('');
-  io.Directory appDocDir =  await getApplicationDocumentsDirectory();
-  String appDocPath =appDocDir.absolute.path;
-  io.File cacheFile = io.File(path.join(appDocPath + cacheFileName));
-  cacheFile.createSync(recursive: true);
+  Future<String> _loadContent(io.File file) {
+    return file.readAsString().asStream().join();
+  }
 
-  if (refresh) {
-    return _fetchContent(request)
-    .then((content){
-      _cacheContent(cacheFile, content);
+  Future<void> _cacheContent(io.File file, String content) {
+    return file.writeAsString(content);
+  }
+
+  Future<Map<String, dynamic>> _load(String cacheFileName, http.Request request, refresh) async {
+    io.File cacheFile = io.File(path.join(appRootPath + cacheFileName));
+    cacheFile.createSync(recursive: true);
+
+    if (refresh) {
+      return _fetchContent(request)
+      .then((content){
+        _cacheContent(cacheFile, content);
+        return converter.jsonDecode(content);
+      });
+    }
+    return _loadContent(cacheFile)
+    .then((content) async {
+      if (content.isEmpty) {
+        content = await _fetchContent(request);
+        _cacheContent(cacheFile, content);
+      }
       return converter.jsonDecode(content);
     });
   }
-  return _loadContent(cacheFile)
-  .then((content) async {
-    if (content.isEmpty) {
-      content = await _fetchContent(request);
-      _cacheContent(cacheFile, content);
-    }
-    return converter.jsonDecode(content);
-  });
-}
 
-
-class SummaryLoader {
-  static Uri get _url => Uri.parse('https://leetcode.com/api/problems/all');
-  static http.Request get _request => http.Request('GET', _url);
-  static String _cacheFileName = 'problemList.json';
-
-  static Future<List<ProblemSummary>> load({refresh = false}) {
+  Future<List<ProblemSummary>> loadProblemList({refresh = false}) {
     List<ProblemSummary> problemList = List<ProblemSummary>();
-    return _load(_cacheFileName, _request, refresh)
+    return _load(_SummaryLoader.cacheFileName, _SummaryLoader.request, refresh)
     .then((content){
       List<dynamic> problemJsonList=content['stat_status_pairs'];
       for ( Map<String, dynamic> problemJson in problemJsonList) {
@@ -61,8 +64,26 @@ class SummaryLoader {
       return problemList;
     });
   }
+
+  Future<Problem> loadProblem(ProblemSummary summary, {refresh = false}) {
+    return _load(_DetailLoader.cacheFilePath(summary.titleSlug), _DetailLoader.generateRequest(summary.titleSlug), refresh)
+    .then((content){
+      content = content['data']['question'];
+      Problem p =Problem.fromSummary(summary);
+      p.description = _DetailLoader.extractDescription(content);
+      p.solution =_DetailLoader.extractSolution(content);
+      return p;
+    });
+  }
 }
-class DetailLoader {
+
+
+class _SummaryLoader {
+  static Uri get _url => Uri.parse('https://leetcode.com/api/problems/all');
+  static http.Request get request => http.Request('GET', _url);
+  static String cacheFileName = 'problemList.json';
+}
+class _DetailLoader {
   static Map<String, dynamic> _graphqlTemplate = {
     'method': 'POST',
     'endpoint': Uri.parse('https://leetcode.com/graphql'),
@@ -82,7 +103,7 @@ class DetailLoader {
                   }'''
     }
   };
-  static http.Request _generateRequest(String titleSlug) {
+  static http.Request generateRequest(String titleSlug) {
     Map<String, dynamic> graphql =_graphqlTemplate;
     graphql['body']['variables']['titleSlug'] =titleSlug;
     http.Request request = http.Request(graphql['method'], graphql['endpoint']);
@@ -92,26 +113,15 @@ class DetailLoader {
   }
   
   static String _cacheDirName = 'problems';
-  static String _cacheFilePath(String titleSlug) => path.join(_cacheDirName, titleSlug + '.json');
+  static String cacheFilePath(String titleSlug) => path.join(_cacheDirName, titleSlug + '.json');
   
-  static String _extractDescription(Map<String, dynamic> content) {
+  static String extractDescription(Map<String, dynamic> content) {
     return content['content'];
   }
-  static String _extractSolution(Map<String, dynamic> content) {
+  static String extractSolution(Map<String, dynamic> content) {
     String solutionMarkdown = content['solution'] != null ? content['solution']['content'] : 'No Solution Avaliable';
     solutionMarkdown = solutionMarkdown.replaceAll('[TOC]', '');
     return markdown.markdownToHtml(solutionMarkdown);
-  }
-
-  static Future<Map<String, String>> load(String titleSlug, refresh) {
-    return _load(_cacheFilePath(titleSlug), _generateRequest(titleSlug), refresh)
-    .then((content){
-      content = content['data']['question'];
-      return {
-        'desc': _extractDescription(content),
-        'solution': _extractSolution(content)
-      };
-    });
   }
 }
 
@@ -138,7 +148,6 @@ class Problem {
     String description;
     String solution;
     ProblemSummary summary;
-    Future<void> loaded;
 
     Uri get contextEndpoint => _context.resolve(this.summary.titleSlug+'/');
     Uri get descContext => _context.resolve(this.summary.titleSlug+'/').resolve('');
@@ -146,19 +155,6 @@ class Problem {
     
     Problem.fromSummary(ProblemSummary summary) {
       this.summary = summary;
-      this.loaded = this.loadDetail();
-    }
-
-    Future<void> loadDetail({refresh=false}) {
-      return DetailLoader.load(this.summary.titleSlug, refresh)
-      .then((content) {
-        this.description = content['desc'];
-        this.solution = content['solution'];
-      });
-    }
-
-    Future<void> refreshDetail() {
-      return loadDetail(refresh: true);
     }
 
     String toString() {
@@ -169,10 +165,12 @@ class Problem {
 
 
 main(List<String> args) {
-  SummaryLoader.load()
-  .then((problemList) {
-    var p = Problem.fromSummary(problemList[212]);
-    p.loaded
-    .then((_) => print(p.description));
+  ContentLoader cL = ContentLoader();
+  cL.loadProblemList()
+  .then((pL) {
+    cL.loadProblem(pL[32])
+    .then((p) {
+      print(p);
+    });
   });
 }

@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import 'html_render.dart';
 import 'data_provider.dart';
 
+ContentLoader cL = ContentLoader();
 
-void main() => runApp(MyApp());
+void main() {
+  cL.inited
+  .then((_) => runApp(MyApp()));
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -37,21 +41,29 @@ class ProblemListState extends State<ProblemList> {
         child: Center(
           child: RefreshIndicator(
             child: _problemList(),
-            onRefresh: _refresh,
+            onRefresh: _refreshList,
           ) 
         ),
       ),
     );
   }
-  @override
-  void initState() {
-    SummaryLoader.load()
-    .then((problems) => this._problems =problems);
+
+  Future<void> _loadList({refresh = false}) {
+    return cL.loadProblemList(refresh: refresh)
+    .then((problems) {
+      return setState(() {
+        this._problems =problems;  
+      });
+    });
   }
 
-  Future<void> _refresh() {
-    return SummaryLoader.load(refresh: true)
-    .then((problems) => this._problems =problems);
+  @override
+  void initState() {
+    _loadList(refresh: false);
+  }
+
+  Future<void> _refreshList() {
+    return _loadList(refresh: true);
   }
 
   Widget _problemList() {
@@ -63,6 +75,13 @@ class ProblemListState extends State<ProblemList> {
 
   List<ListTile> _summaryRows(List<ProblemSummary> problems) {
     List<ListTile> summaryList = List<ListTile>();
+    if (problems == null) {
+      print('dsdfs');
+      summaryList.add(ListTile(
+        title: Text('Loading'),
+      ));
+      return summaryList;
+    }
     for (ProblemSummary summary in problems) {
       summaryList.add(ListTile(
         title: Text('${summary.id}. ${summary.title}'),
@@ -72,7 +91,7 @@ class ProblemListState extends State<ProblemList> {
             context,
             MaterialPageRoute(
               builder: (context) => ProblemPage(
-                problemDetails:  Problem.fromSummary(summary)
+                summary:  summary
               )),
           );
         },
@@ -83,19 +102,20 @@ class ProblemListState extends State<ProblemList> {
 }
 
 class ProblemPage extends StatefulWidget {
-  final Problem problemDetails;
-  ProblemPage({Key key, @required this.problemDetails}) : super(key: key);
+  final ProblemSummary summary;
+  ProblemPage({Key key, @required this.summary}) : super(key: key);
   @override
-  ProblemPageState createState() => new ProblemPageState(problemDetails: this.problemDetails);
+  ProblemPageState createState() => new ProblemPageState(summary: this.summary);
 }
 class ProblemPageState extends State<ProblemPage> {
-  final Problem problemDetails;
-  ProblemPageState({@required this.problemDetails});
+  final ProblemSummary summary;
+  Problem problem;
+  ProblemPageState({@required this.summary});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(this.problemDetails.summary.title),
+        title: Text(this.summary.title),
       ),
       body: Container(
         child: Center(
@@ -108,19 +128,22 @@ class ProblemPageState extends State<ProblemPage> {
     );
   }
 
-  @override
-  void initState() {
-    problemDetails.loaded
-    .then((_) {
-      setState(() {});
+  Future<void> _loadProblem({refresh = false}) {
+    return cL.loadProblem(summary, refresh: refresh)
+    .then((problem) {
+      return setState(() {
+        this.problem = problem;
+      });
     });
   }
 
+  @override
+  void initState() {
+    _loadProblem();
+  }
+
   Future<void> _refreshProblem() {
-    return problemDetails.loadDetail(refresh: true)
-    .then((_) {
-      setState(() {});
-    });
+    return _loadProblem(refresh: true);
   }
 
   Widget _detailePage() {
@@ -128,8 +151,8 @@ class ProblemPageState extends State<ProblemPage> {
       physics: const AlwaysScrollableScrollPhysics(),
       child: Column(
         children: <Widget>[
-          htmlParse(this.problemDetails.description ?? '<p>Loading...<p/>'), 
-          htmlParse(this.problemDetails.solution ?? '**No Solution Available**') 
+          htmlParse(this.problem != null ? this.problem.description : '<p>Loading...<p/>'), 
+          htmlParse(this.problem != null ? this.problem.solution : '**No Solution Available**') 
         ],
       )
     );
