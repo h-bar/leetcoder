@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'html_render.dart';
-import 'content_loder.dart';
+import 'data_provider.dart';
 
 
 void main() => runApp(MyApp());
@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'LeetCoder',
       theme: new ThemeData(
-        primaryColor: Colors.white,
+        primaryColor: Colors.black,
       ),
       home: ProblemList(),
     );
@@ -25,20 +25,19 @@ class ProblemList extends StatefulWidget {
   ProblemListState createState() => new ProblemListState();
 }
 class ProblemListState extends State<ProblemList> {
-  List<dynamic> _problems = new List<dynamic>();
-  final _biggerFont = const TextStyle(fontSize: 18.0);
-
+  List<ProblemSummary> _problems;
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Problem List'), 
+        title: Text('Problems'), 
       ),
       body: Container(
         child: Center(
           child: RefreshIndicator(
-            child: _buildProblemList(),
-            onRefresh: _refreshProblems,
+            child: _problemList(),
+            onRefresh: _refresh,
           ) 
         ),
       ),
@@ -46,82 +45,62 @@ class ProblemListState extends State<ProblemList> {
   }
   @override
   void initState() {
-    _loadProblems();
+    SummaryLoader.load()
+    .then((problems) => this._problems =problems);
   }
 
-  Future<void> _loadProblems({refresh = false}) async {
-    loadContent('problemList', 'problemList', refresh)
-    .then((data) {
-      setState(() {
-        _problems = data['stat_status_pairs'];
-        print('Data loaded from local cache');
-      });
-    });
+  Future<void> _refresh() {
+    return SummaryLoader.load(refresh: true)
+    .then((problems) => this._problems =problems);
   }
 
-  Future<void> _refreshProblems() async {
-    _loadProblems(refresh: true);
-  }
-
-  Widget _buildProblemList() {
-    return ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemBuilder: (context, idx) {
-          return idx < _problems.length ? _buildRow(_problems[idx]) : null;
-        },
-      );
-  }
-
-  Widget _buildRow(Map<String, dynamic> problemDetail) {
-    List<String> _difficultyLevel = ['Easy', 'Medium', 'Hard'];
-    final Map<String, dynamic> _stat = problemDetail['stat'];
-    final int _id = _stat['frontend_question_id'];
-    final String _titleSlug = _stat['question__title_slug'];
-    final String _displayTitle = _stat['question__title'];
-    final int _diffculty = problemDetail['difficulty']['level'];
-    
-    return ListTile(
-      title: Text(
-        '$_id. $_displayTitle',
-        style: _biggerFont,
-      ),
-      subtitle: Text(_difficultyLevel[_diffculty-1]),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ProblemPage(problemDetails:  {
-            'id': _id,
-            'titleSlug': _titleSlug,
-            'displayTitle':_displayTitle,
-            'diffculty':_diffculty
-          })),
-        );
-      },
+  Widget _problemList() {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: _summaryRows(this._problems),
     );
+  }
+
+  List<ListTile> _summaryRows(List<ProblemSummary> problems) {
+    List<ListTile> summaryList = List<ListTile>();
+    for (ProblemSummary summary in problems) {
+      summaryList.add(ListTile(
+        title: Text('${summary.id}. ${summary.title}'),
+        subtitle: Text(summary.difficultyLevel),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProblemPage(
+                problemDetails:  Problem.fromSummary(summary)
+              )),
+          );
+        },
+      ));
+    }
+    return summaryList;
   }
 }
 
 class ProblemPage extends StatefulWidget {
-  final Map<String, dynamic> problemDetails;
+  final Problem problemDetails;
   ProblemPage({Key key, @required this.problemDetails}) : super(key: key);
   @override
   ProblemPageState createState() => new ProblemPageState(problemDetails: this.problemDetails);
 }
 class ProblemPageState extends State<ProblemPage> {
-  final Map<String, dynamic> problemDetails;
-  String _problemDesc;
-  String _problemSolution;
+  final Problem problemDetails;
   ProblemPageState({@required this.problemDetails});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(this.problemDetails['displayTitle']),
+        title: Text(this.problemDetails.summary.title),
       ),
       body: Container(
         child: Center(
           child: RefreshIndicator(
-            child: _buildProblemPage(),
+            child: _detailePage(),
             onRefresh: _refreshProblem,
           ) 
         ),
@@ -131,32 +110,26 @@ class ProblemPageState extends State<ProblemPage> {
 
   @override
   void initState() {
-    _loadProblemDetail();
-  }
-
-  Future<void> _loadProblemDetail({refresh = false}) async {
-    loadContent('problemDetail', this.problemDetails['titleSlug'], refresh)
-    .then((content) {
-      var problemDetails = content['data']['question'];
-      setState(() {
-        this._problemDesc = problemDetails['content'];
-        this._problemSolution = problemDetails['solution'] != null ? problemDetails['solution']['content'] : null;
-        // this._problemSolution = problemDetails['solution'] != null ? problemDetails['solution']['__typename'] : null;
-      });
+    problemDetails.loaded
+    .then((_) {
+      setState(() {});
     });
   }
 
-  Future<void> _refreshProblem() async {
-    _loadProblemDetail(refresh: true);
+  Future<void> _refreshProblem() {
+    return problemDetails.loadDetail(refresh: true)
+    .then((_) {
+      setState(() {});
+    });
   }
 
-  Widget _buildProblemPage() {
+  Widget _detailePage() {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       child: Column(
         children: <Widget>[
-          htmlParse(this._problemDesc ?? '<p>Loading...<p/>'), 
-          markdownParser(this._problemSolution ?? '**No Solution Available**') 
+          htmlParse(this.problemDetails.description ?? '<p>Loading...<p/>'), 
+          htmlParse(this.problemDetails.solution ?? '**No Solution Available**') 
         ],
       )
     );
