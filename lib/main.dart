@@ -76,7 +76,6 @@ class ProblemListState extends State<ProblemList> {
   List<ListTile> _summaryRows(List<ProblemSummary> problems) {
     List<ListTile> summaryList = List<ListTile>();
     if (problems == null) {
-      print('dsdfs');
       summaryList.add(ListTile(
         title: Text('Loading'),
       ));
