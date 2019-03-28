@@ -69,6 +69,22 @@ TextSpan _parseInLineNode(dom.Node node) { //TODO: Solve the Notes gap problem, 
   );
 }
 
+Widget _node2Widget(dom.Node node) {
+  Widget childNode = _parseNode(node);
+  if (!(node is dom.Element)) {
+    return childNode;
+  }
+
+  dom.Element nodeE = node as dom.Element;
+  if (nodeE.localName == 'pre') {
+    return new Container(
+      color: Colors.grey[200],
+      child: childNode,
+    );
+  }
+  return childNode;
+}
+
 Widget _parseNode(dom.Node node) {
   if (!(node is dom.Element)) {
     return null;
@@ -105,7 +121,7 @@ Widget _parseNode(dom.Node node) {
       ));
     }
     else {
-      Widget nextNodeWidget = _parseNode(nextNode);
+      Widget nextNodeWidget = _node2Widget(nextNode);
       if (nextNodeWidget != null) {
         childWidgets.add(nextNodeWidget);
       }
