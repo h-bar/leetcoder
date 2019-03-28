@@ -118,13 +118,11 @@ class ProblemPageState extends State<ProblemPage> {
         title: Text(this.summary.title),
       ),
       body: Container(
-        child: Center(
           child: RefreshIndicator(
             child: _detailePage(),
             onRefresh: _refreshProblem,
           ) 
         ),
-      ),
     );
   }
 
