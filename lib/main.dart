@@ -106,9 +106,10 @@ class ProblemPage extends StatefulWidget {
   @override
   ProblemPageState createState() => new ProblemPageState(summary: this.summary);
 }
-class ProblemPageState extends State<ProblemPage> {
+class ProblemPageState extends State<ProblemPage> with SingleTickerProviderStateMixin {
   final ProblemSummary summary;
   Problem problem;
+  TabController _tabController;
   ProblemPageState({@required this.summary});
   @override
   Widget build(BuildContext context) {
@@ -116,12 +117,29 @@ class ProblemPageState extends State<ProblemPage> {
       appBar: AppBar(
         title: Text(this.summary.title),
       ),
-      body: Container(
+      body: TabBarView(
+        controller: _tabController,
+        children: <Widget>[
+          Container(
           child: RefreshIndicator(
             child: _detailePage(),
             onRefresh: _refreshProblem,
+          ),),
+          Container(
+          child: RefreshIndicator(
+            child: _solutionPage(),
+            onRefresh: _refreshProblem,
           ) 
-        ),
+        )]
+      ),
+      bottomNavigationBar: TabBar(
+        controller: _tabController,
+        tabs: <Widget>[
+          Tab(text: 'Description',),
+          Tab(text: 'Solution',)
+        ],
+        labelColor: Colors.black,
+      ),
     );
   }
 
@@ -136,22 +154,32 @@ class ProblemPageState extends State<ProblemPage> {
 
   @override
   void initState() {
+    super.initState();
+    _tabController = TabController(vsync: this, length: 2);
     _loadProblem();
   }
 
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
   Future<void> _refreshProblem() {
     return _loadProblem(refresh: true);
   }
 
   Widget _detailePage() {
     return SingleChildScrollView(
+      padding: const EdgeInsets.all(20.0),
       physics: const AlwaysScrollableScrollPhysics(),
-      child: Column(
-        children: <Widget>[
-          htmlParse(this.problem != null ? this.problem.description : '<p>Loading...<p/>'), 
-          htmlParse(this.problem != null ? this.problem.solution : '**No Solution Available**') 
-        ],
-      )
+      child: htmlParse(this.problem != null ? this.problem.description : '<p>Loading...<p/>'),
+    );
+  }
+
+  Widget _solutionPage() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20.0),
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: htmlParse(this.problem != null ? this.problem.solution : '**No Solution Available**'),
     );
   }
 }
