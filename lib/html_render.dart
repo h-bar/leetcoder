@@ -71,7 +71,7 @@ TextSpan _parseInLineNode(dom.Node node) { //TODO: Solve the Notes gap problem, 
 
 Widget _node2Widget(dom.Node node) {
   Widget childNode = _parseNode(node);
-  if (!(node is dom.Element)) {
+  if (node is! dom.Element) {
     return childNode;
   }
 
@@ -86,7 +86,7 @@ Widget _node2Widget(dom.Node node) {
 }
 
 Widget _parseNode(dom.Node node) {
-  if (!(node is dom.Element)) {
+  if (node is! dom.Element) {
     return null;
   }
 
