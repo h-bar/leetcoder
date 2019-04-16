@@ -109,10 +109,13 @@ Widget _parseNode(dom.Node node) {
     if (_isInlineText(nextNode)) {
       List<TextSpan> textSpans = List<TextSpan>();
       TextSpan nextTextSpan = _parseInLineTextNode(nextNode);
+      if (nextTextSpan == null) {
+        continue;
+      }
       if (childWidgets.isNotEmpty && childWidgets.last is RichText) {
         textSpans.addAll((childWidgets.removeLast() as RichText).text.children);
       }
-      textSpans.add(_parseInLineNode(nextNode));
+      textSpans.add(nextTextSpan);
       childWidgets.add(RichText(
         text: TextSpan(
           children: textSpans, 
