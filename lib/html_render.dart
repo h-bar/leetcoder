@@ -53,7 +53,7 @@ bool _isInlineText(dom.Node node) {
 }
 
 
-TextSpan _parseInLineNode(dom.Node node) { //TODO: Solve the Notes gap problem, caused by having some '\n' or '\n    ' that was rendered into a colume
+TextSpan _parseInLineTextNode(dom.Node node) { //TODO: Solve the Notes gap problem, caused by having some '\n' or '\n    ' that was rendered into a colume
   if (node is dom.Text) {
     return node.text.trim() == '' ? null : TextSpan(text: node.text);
   }
@@ -61,7 +61,7 @@ TextSpan _parseInLineNode(dom.Node node) { //TODO: Solve the Notes gap problem, 
   dom.Element nodeE = node as dom.Element;
   List<TextSpan> textSpan = List<TextSpan>();
   for (dom.Node nextNode in node.nodes) {
-    textSpan.add(_parseInLineNode(nextNode));
+    textSpan.add(_parseInLineTextNode(nextNode));
   }
   return TextSpan(
     children: textSpan,
@@ -108,6 +108,7 @@ Widget _parseNode(dom.Node node) {
   for (dom.Node nextNode in nodeE.nodes) {
     if (_isInlineText(nextNode)) {
       List<TextSpan> textSpans = List<TextSpan>();
+      TextSpan nextTextSpan = _parseInLineTextNode(nextNode);
       if (childWidgets.isNotEmpty && childWidgets.last is RichText) {
         textSpans.addAll((childWidgets.removeLast() as RichText).text.children);
       }
