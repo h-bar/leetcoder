@@ -68,21 +68,23 @@ TextSpan _parseInLineTextNode(dom.Node node) { //TODO: Solve the Notes gap probl
     style: textStyleSheet[nodeE.localName],
   );
 }
+Container _parsePreNode(dom.Node node) {
+  return new Container(
+      color: Colors.grey[200],
+      child: _parseNode(node),
+    );
+}
 
 Widget _node2Widget(dom.Node node) {
-  Widget childNode = _parseNode(node);
   if (node is! dom.Element) {
-    return childNode;
+    return _parseNode(node);
   }
 
   dom.Element nodeE = node as dom.Element;
   if (nodeE.localName == 'pre') {
-    return new Container(
-      color: Colors.grey[200],
-      child: childNode,
-    );
+    return _parsePreNode(node);
   }
-  return childNode;
+  return _parseNode(node);
 }
 
 Widget _parseNode(dom.Node node) {
