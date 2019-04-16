@@ -55,7 +55,7 @@ bool _isInlineText(dom.Node node) {
 
 TextSpan _parseInLineNode(dom.Node node) { //TODO: Solve the Notes gap problem, caused by having some '\n' or '\n    ' that was rendered into a colume
   if (node is dom.Text) {
-    return TextSpan(text: node.text);
+    return node.text.trim() == '' ? null : TextSpan(text: node.text);
   }
   
   dom.Element nodeE = node as dom.Element;
