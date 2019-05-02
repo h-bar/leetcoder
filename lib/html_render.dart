@@ -51,26 +51,35 @@ bool _isInlineText(dom.Node node) {
   return (node is dom.Text) || (node is dom.Element && textStyleSheet.keys.contains(node.localName));
 }
 
-
-TextSpan _parseInLineTextNode(dom.Node node) {
+TextSpan _parseInLineTextNode(dom.Node node, {isPre: false}) {
   if (node is dom.Text) {
-    return node.text.trim() == '' ? null : TextSpan(text: node.text);
+   return (!isPre && node.text.trim() == '') ? null : TextSpan(text: node.text);
   }
   
   dom.Element nodeE = node as dom.Element;
   List<TextSpan> textSpan = List<TextSpan>();
   for (dom.Node nextNode in node.nodes) {
-    textSpan.add(_parseInLineTextNode(nextNode));
+    TextSpan nextSpan = _parseInLineTextNode(nextNode, isPre: isPre);
+    if (nextSpan != null){
+      textSpan.add(nextSpan);
+    }
   }
   return TextSpan(
     children: textSpan,
     style: textStyleSheet[nodeE.localName],
   );
 }
-Container _parsePreNode(dom.Node node) {
+
+Widget _parsePreNode(dom.Node node) {
+  TextSpan textSpan = _parseInLineTextNode(node, isPre: true);
   return new Container(
       color: Colors.grey[200],
-      child: _parseNode(node),
+      child: RichText(
+        text: TextSpan(
+          children: _parseInLineTextNode(node, isPre: true).children,
+          style: TextStyle(color: Colors.black)
+          ),
+      )
     );
 }
 
