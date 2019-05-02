@@ -51,7 +51,7 @@ bool _isInlineText(dom.Node node) {
   return (node is dom.Text) || (node is dom.Element && textStyleSheet.keys.contains(node.localName));
 }
 
-TextSpan _parseInLineTextNode(dom.Node node, {isPre: false}) {
+TextSpan _parseTextNode(dom.Node node, {isPre: false}) {
   if (node is dom.Text) {
    return (!isPre && node.text.trim() == '') ? null : TextSpan(text: node.text);
   }
@@ -59,7 +59,7 @@ TextSpan _parseInLineTextNode(dom.Node node, {isPre: false}) {
   dom.Element nodeE = node as dom.Element;
   List<TextSpan> textSpan = List<TextSpan>();
   for (dom.Node nextNode in node.nodes) {
-    TextSpan nextSpan = _parseInLineTextNode(nextNode, isPre: isPre);
+    TextSpan nextSpan = _parseTextNode(nextNode, isPre: isPre);
     if (nextSpan != null){
       textSpan.add(nextSpan);
     }
@@ -71,12 +71,12 @@ TextSpan _parseInLineTextNode(dom.Node node, {isPre: false}) {
 }
 
 Widget _parsePreNode(dom.Node node) {
-  TextSpan textSpan = _parseInLineTextNode(node, isPre: true);
+  TextSpan textSpan = _parseTextNode(node, isPre: true);
   return new Container(
       color: Colors.grey[200],
       child: RichText(
         text: TextSpan(
-          children: _parseInLineTextNode(node, isPre: true).children,
+          children: _parseTextNode(node, isPre: true).children,
           style: TextStyle(color: Colors.black)
           ),
       )
@@ -118,7 +118,7 @@ Widget _parseNode(dom.Node node) {
   for (dom.Node nextNode in nodeE.nodes) {
     if (_isInlineText(nextNode)) {
       List<TextSpan> textSpans = List<TextSpan>();
-      TextSpan nextTextSpan = _parseInLineTextNode(nextNode);
+      TextSpan nextTextSpan = _parseTextNode(nextNode);
       if (nextTextSpan == null) {
         continue;
       }
