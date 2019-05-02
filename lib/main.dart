@@ -83,7 +83,7 @@ class ProblemListState extends State<ProblemList> {
     }
     for (ProblemSummary summary in problems) {
       summaryList.add(ListTile(
-        title: Text('${summary.id}. ${summary.title}'),
+        title: Text('${summary.qId}. ${summary.title}'),
         subtitle: Text(summary.difficultyLevel),
         onTap: () {
           Navigator.push(

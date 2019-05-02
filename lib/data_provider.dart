@@ -129,6 +129,7 @@ class ProblemSummary {
   final List<String> _difficultyLevels = ['Easy', 'Medium', 'Hard'];
   
   int id;
+  int qId;
   String title;
   String titleSlug;
   String difficultyLevel;
@@ -136,6 +137,7 @@ class ProblemSummary {
 
   ProblemSummary.fromMap(Map<String, dynamic> statStatusPair) {
     this.id=statStatusPair['stat']['question_id'];
+    this.qId=statStatusPair['stat']['frontend_question_id'];
     this.title=statStatusPair['stat']['question__title'];
     this.titleSlug=statStatusPair['stat']['question__title_slug'];
     this.difficultyLevel=_difficultyLevels[statStatusPair['difficulty']['level']-1];
