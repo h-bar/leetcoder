@@ -52,9 +52,10 @@ class ProblemListState extends State<ProblemList> {
     return cL.loadProblemList(refresh: refresh)
     .then((problems) {
       return setState(() {
-        this._problems =problems;  
+        this._problems = problems;
+        this._problems.sort((a, b) => b.qId - a.qId);  
       });
-    });
+    }); 
   }
 
   @override
