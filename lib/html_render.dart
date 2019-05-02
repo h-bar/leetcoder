@@ -71,7 +71,6 @@ TextSpan _parseTextNode(dom.Node node, {isPre: false}) {
 }
 
 Widget _parsePreNode(dom.Node node) {
-  TextSpan textSpan = _parseTextNode(node, isPre: true);
   return new Container(
       color: Colors.grey[200],
       child: RichText(
