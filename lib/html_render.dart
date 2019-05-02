@@ -33,7 +33,7 @@ final Map<String, TextStyle> textStyleSheet = {
     "code": TextStyle(
       fontFamily: 'monospace',
       color: Colors.blueGrey,
-      background: Paint()..color = Colors.grey[100],
+      background: Paint()..color = Colors.grey[200],
     ),
     "span": TextStyle(
       fontFamily: 'monospace',
