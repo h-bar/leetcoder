@@ -43,6 +43,9 @@ final Map<String, TextStyle> textStyleSheet = {
       decoration: TextDecoration.underline,
       color: Colors.blueAccent,
       decorationColor: Colors.blueAccent
+    ),
+    "defalut": const TextStyle(
+      color: Colors.black,
     )
   };
 
@@ -51,9 +54,17 @@ bool _isInlineText(dom.Node node) {
   return (node is dom.Text) || (node is dom.Element && textStyleSheet.keys.contains(node.localName));
 }
 
-TextSpan _parseTextNode(dom.Node node, {isPre: false}) {
+
+TextSpan _parseTextNode(dom.Node node,{bool isPre: false}) {
   if (node is dom.Text) {
-   return (!isPre && node.text.trim() == '') ? null : TextSpan(text: node.text);
+    if (!isPre && node.text.trim() == '') {
+      return null;
+    }
+    
+    return TextSpan(
+      text: node.text,
+      style: textStyleSheet[node.parent.localName] ?? textStyleSheet['defalut']
+    );
   }
   
   dom.Element nodeE = node as dom.Element;
@@ -64,20 +75,14 @@ TextSpan _parseTextNode(dom.Node node, {isPre: false}) {
       textSpan.add(nextSpan);
     }
   }
-  return TextSpan(
-    children: textSpan,
-    style: textStyleSheet[nodeE.localName],
-  );
+  return TextSpan(children: textSpan);
 }
 
 Widget _parsePreNode(dom.Node node) {
   return new Container(
       color: Colors.grey[200],
       child: RichText(
-        text: TextSpan(
-          children: _parseTextNode(node, isPre: true).children,
-          style: TextStyle(color: Colors.black)
-          ),
+        text: _parseTextNode(node, isPre: true)
       )
     );
 }
