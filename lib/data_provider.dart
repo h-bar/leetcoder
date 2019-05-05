@@ -120,6 +120,7 @@ class _DetailLoader {
   }
   static String extractSolution(Map<String, dynamic> content) {
     String solutionMarkdown = content['solution'] != null ? content['solution']['content'] : 'No Solution Avaliable';
+    solutionMarkdown = solutionMarkdown ?? 'No Solution Avaliable';
     solutionMarkdown = solutionMarkdown.replaceAll('[TOC]', '');
     return markdown.markdownToHtml(solutionMarkdown);
   }
