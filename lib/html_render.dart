@@ -79,7 +79,6 @@ TextSpan _parseTextNode(dom.Node node,{bool isPre: false}) {
     );
   }
   
-  dom.Element nodeE = node as dom.Element;
   List<TextSpan> textSpan = List<TextSpan>();
   for (dom.Node nextNode in node.nodes) {
     TextSpan nextSpan = _parseTextNode(nextNode, isPre: isPre);
