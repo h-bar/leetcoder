@@ -110,6 +110,7 @@ class ProblemPage extends StatefulWidget {
 class ProblemPageState extends State<ProblemPage> with SingleTickerProviderStateMixin {
   final ProblemSummary summary;
   Problem problem;
+  HtmlRenderer _renderer = HtmlRenderer();
   TabController _tabController;
   ProblemPageState({@required this.summary});
   @override
@@ -169,18 +170,22 @@ class ProblemPageState extends State<ProblemPage> with SingleTickerProviderState
   }
 
   Widget _detailePage() {
+    _renderer.htmlData = this.problem != null ? this.problem.description : '<p>Loading...<p/>';
+    _renderer.htmlContext = this.problem != null ?  this.problem.descContext : null;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
       physics: const AlwaysScrollableScrollPhysics(),
-      child: htmlParse(this.problem != null ? this.problem.description : '<p>Loading...<p/>'),
+      child: _renderer.parse(),
     );
   }
 
   Widget _solutionPage() {
+    _renderer.htmlData = this.problem != null ? this.problem.solution : '<p>Loading...<p/>';
+    _renderer.htmlContext = this.problem != null ?  this.problem.solutionContext : null;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
       physics: const AlwaysScrollableScrollPhysics(),
-      child: htmlParse(this.problem != null ? this.problem.solution : '**No Solution Available**'),
+      child: _renderer.parse(),
     );
   }
 }
