@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
@@ -59,6 +60,17 @@ TextSpan _parseTextNode(dom.Node node,{bool isPre: false}) {
   if (node is dom.Text) {
     if (!isPre && node.text.trim() == '') {
       return null;
+    }
+
+    if (node.parent.localName == 'a') {
+      return TextSpan(
+        text: node.text,
+        style: textStyleSheet[node.parent.localName] ?? textStyleSheet['defalut'],
+        recognizer: TapGestureRecognizer()
+        ..onTap = () {
+          print('tapped');
+        },
+      ); 
     }
     
     return TextSpan(
