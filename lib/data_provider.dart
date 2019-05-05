@@ -70,7 +70,7 @@ class ContentLoader {
     .then((content){
       content = content['data']['question'];
       Problem p =Problem.fromSummary(summary);
-      p.description = _DetailLoader.extractDescription(content);
+      p.description = summary.paidOnly ? '<p> Paid only content <p>' : _DetailLoader.extractDescription(content);
       p.solution =_DetailLoader.extractSolution(content);
       return p;
     });
@@ -96,6 +96,7 @@ class _DetailLoader {
       'query': '''query questionData(\$titleSlug: String!) {
                     question(titleSlug: \$titleSlug) {
                       content
+                      isPaidOnly
                       solution {
                         content
                       }
