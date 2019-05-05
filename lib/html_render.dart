@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
+import 'package:url_launcher/url_launcher.dart';
 
 Widget htmlParse(String data) {
   dom.Document document = parser.parse(data);
@@ -67,9 +68,14 @@ TextSpan _parseTextNode(dom.Node node,{bool isPre: false}) {
         text: node.text,
         style: textStyleSheet[node.parent.localName] ?? textStyleSheet['defalut'],
         recognizer: TapGestureRecognizer()
-        ..onTap = () {
-          print('tapped');
-        },
+        ..onTap = () async {
+          String url = node.parent.attributes['href'];
+          if (await canLaunch(url)) {
+            await launch(url);
+          } else {
+            throw 'Could not launch $url';
+          }
+        }, 
       ); 
     }
     
