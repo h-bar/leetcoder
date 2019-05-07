@@ -60,6 +60,7 @@ class ProblemListState extends State<ProblemList> {
 
   @override
   void initState() {
+    super.initState();
     _loadList(refresh: false);
   }
 
