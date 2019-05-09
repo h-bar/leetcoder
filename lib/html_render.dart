@@ -154,8 +154,11 @@ class _RenderTreeNode {
   Widget toWidget() {
     switch (this.type) {
       case 'text':
-        String text = this.style.isPre? this.text : this.text.replaceAll(new RegExp(r"\s+"), " ");
-        text = this.style.isPre ? text : text.trimLeft();
+        String text = this.text;
+        if (!this.style.isPre) {
+          text = text.replaceAll(new RegExp(r'\s+'), ' ');
+          text = text.trim().isNotEmpty ? text : '';
+        }
         
         return text.isEmpty ? null : Text.rich(TextSpan(
           text: text,
