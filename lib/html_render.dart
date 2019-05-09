@@ -172,7 +172,6 @@ class _RenderTreeNode {
     _RenderTreeNode olderChild = this.children.length == 0 ? null : this.children[0];
     for (_RenderTreeNode child in this.children) {
       bool addNewCol = !olderChild.style.isInline || !child.style.isInline;
-      addNewCol &= !child.style.isPre;
       addNewCol |= widgetsHolder.length == 0;
       
       if (addNewCol) { 
