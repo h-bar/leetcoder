@@ -209,10 +209,17 @@ class _RenderTreeNode {
       }
     }
 
+    if (widgets.isEmpty) {
+      return null;
+    }
+    if (widgets.length == 1) {
+      return widgets[0];
+    }
+
     return Column(
       children: widgets,
       crossAxisAlignment: CrossAxisAlignment.start,
-      );
+    );
   }
 }
 
