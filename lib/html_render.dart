@@ -1,21 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
+import 'package:flutter/widgets.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
 import 'package:url_launcher/url_launcher.dart';
 
-class HtmlRenderer{
-  String htmlData;
-  Uri htmlContext;
+class _RenderTreeNodeStyle {
+  bool isInline = true;
+  bool isPre = false;
+  bool isLink = false;
+  TextStyle textStyle;
 
-  Widget parse() {
-    dom.Document document = parser.parse(this.htmlData);
-    Widget widgeList = _parseNode(document.body);
-    return widgeList;
+  _RenderTreeNodeStyle(bool isInline, {bool isPre: false, bool isLink: false}) {
+    this.isInline = isInline;
+    this.isPre = isPre;
+    this.isLink = isLink;
   }
 
-  final Map<String, TextStyle> _textStyleSheet = {
+  _RenderTreeNodeStyle.textStyole(bool isInline, TextStyle style, {bool isLink: false}) {
+    this.isInline = isInline;
+    this.textStyle = style;
+    this.isLink = isLink;
+  }
+}
+
+class _RenderTreeNode {
+  bool isTerminal;
+  String text = '';
+  String type;
+  String tag;
+  dom.Node node;
+  _RenderTreeNodeStyle style;
+  Uri htmlContext;
+
+  _RenderTreeNode parent;
+  List<_RenderTreeNode> children = List<_RenderTreeNode>();
+
+  static const List<String> _terminalTag = [
+    'img',
+  ];
+
+  static final Map<String, TextStyle> _textStyleSheet = {
     "strong": const TextStyle(
       color: Colors.black,
       fontWeight: FontWeight.bold,
@@ -55,121 +81,149 @@ class HtmlRenderer{
     )
   };
 
+  Map<String, _RenderTreeNodeStyle> _styleSheet = {
+    'body': _RenderTreeNodeStyle(false),
+    'p': _RenderTreeNodeStyle(false),
+    'div': _RenderTreeNodeStyle(false,),
+    'pre': _RenderTreeNodeStyle(false, isPre: true),
+    'img': _RenderTreeNodeStyle(false),
+    'strong': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['strong']),
+    'span': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['span']),
+    'em': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['em']),
+    'text': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['text']),
+    'code': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['code']),
+    'i': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['i']),
+    'font': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['font']),
+    'b': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['b']),
+    'a': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['a'], isLink: true),
+  };
 
-  bool _isInlineText(dom.Node node) {
-    return (node is dom.Text) || (node is dom.Element && _textStyleSheet.keys.contains(node.localName));
+  _RenderTreeNode(dom.Node node, _RenderTreeNode parent, Uri context) {
+    this.node = node;
+    this.parent = parent;
+    this.htmlContext = context;
+    _initNode();
+    _addStyle();
+    for (dom.Node nextNode in node.nodes) {
+      this.children.add(_RenderTreeNode(nextNode, this, this.htmlContext));
+    }
   }
 
-
-  TextSpan _parseTextNode(dom.Node node,{bool isPre: false}) {
+  void _initNode() {
     if (node is dom.Text) {
-      if (!isPre && node.text.trim() == '') {
-        return null;
-      }
-
-      if (node.parent.localName == 'a') {
-        return TextSpan(
-          text: node.text,
-          style: _textStyleSheet[node.parent.localName] ?? _textStyleSheet['defalut'],
-          recognizer: TapGestureRecognizer()
-          ..onTap = () async {
-            String url = node.parent.attributes['href'];
-            if (await canLaunch(url)) {
-              await launch(url);
-            } else {
-              throw 'Could not launch $url';
-            }
-          }, 
-        ); 
-      }
-      
-      return TextSpan(
-        text: node.text,
-        style: _textStyleSheet[node.parent.localName] ?? _textStyleSheet['defalut']
-      );
+      this.text = node.text;
+      this.type = 'text';
+      this.tag = 'text';
+      return;
     }
     
-    List<TextSpan> textSpan = List<TextSpan>();
-    for (dom.Node nextNode in node.nodes) {
-      TextSpan nextSpan = _parseTextNode(nextNode, isPre: isPre);
-      if (nextSpan != null){
-        textSpan.add(nextSpan);
-      }
-    }
-    return TextSpan(children: textSpan);
-  }
-
-  Widget _parsePreNode(dom.Node node) {
-    return new Container(
-        color: Colors.grey[200],
-        child: RichText(
-          text: _parseTextNode(node, isPre: true)
-        )
-      );
-  }
-
-  Widget _node2Widget(dom.Node node) {
-    if (node is! dom.Element) {
-      return _parseNode(node);
-    }
-
     dom.Element nodeE = node as dom.Element;
-    if (nodeE.localName == 'pre') {
-      return _parsePreNode(node);
+    this.tag = nodeE.localName;
+    this.type = this.tag;
+
+    if (node.children.isEmpty && !_RenderTreeNode._terminalTag.contains(this.tag)) {
+      this.type = 'text';
+      this.text = node.text;
+      return;
     }
-    return _parseNode(node);
   }
 
-  Widget _parseNode(dom.Node node) {
-    if (node is! dom.Element) {
-      return null;
+  void _addStyle() {
+    this.style = this._styleSheet[this.tag] ?? _RenderTreeNodeStyle(false);
+    if (this.parent != null) {
+      this.style.isPre = this.parent.style.isPre || this.style.isPre;
     }
+  }
 
-    dom.Element nodeE = node as dom.Element;
-    dom.NodeList children = nodeE.nodes;
-    String nodeTag = nodeE.localName;
-
-    if (nodeTag == 'img') {
-      Uri uri = Uri.parse(node.attributes['src']);
-      uri = uri.hasScheme ? uri : this.htmlContext.resolveUri(uri);
-      return Image.network(uri.toString());
-    }
-
-    if (children.isEmpty) {
-      return null;
-    }
-
-    List<Widget> childWidgets = List<Widget>();
-    for (dom.Node nextNode in nodeE.nodes) {
-      if (_isInlineText(nextNode)) {
-        List<TextSpan> textSpans = List<TextSpan>();
-        TextSpan nextTextSpan = _parseTextNode(nextNode);
-        if (nextTextSpan == null) {
-          continue;
+  TapGestureRecognizer _linkTapped() {
+    if (this.style.isLink) {
+      return TapGestureRecognizer()..onTap = () async {
+        Uri uri = Uri.parse(this.node.attributes['href']);
+        uri = uri.hasScheme ? uri : this.htmlContext.resolveUri(uri);
+        if (await canLaunch(uri.toString())) {
+          await launch(uri.toString());
+        } else {
+          throw 'Could not launch $uri';
         }
-        if (childWidgets.isNotEmpty && childWidgets.last is RichText) {
-          textSpans.addAll((childWidgets.removeLast() as RichText).text.children);
-        }
-        textSpans.add(nextTextSpan);
-        childWidgets.add(RichText(
-          text: TextSpan(
-            children: textSpans, 
-            style: TextStyle(color: Colors.black)
-            ),
-          textAlign: TextAlign.left,
+      };
+    }
+
+    return null;
+  }
+
+  Widget toWidget() {
+    switch (this.type) {
+      case 'text':
+        String text = this.style.isPre? this.text : this.text.replaceAll(new RegExp(r"\s+"), " ");
+        text = this.style.isPre ? text : text.trimLeft();
+        
+        return text.isEmpty ? null : Text.rich(TextSpan(
+          text: text,
+          style: this.style.textStyle,
+          recognizer: _linkTapped()
         ));
+      case 'img':
+        Uri uri = Uri.parse(this.node.attributes['src']);
+        uri = uri.hasScheme ? uri : this.htmlContext.resolveUri(uri);
+        return Image.network(uri.toString());
+    }
+      
+    List<List<Widget>> widgetsHolder =  List<List<Widget>>();
+    _RenderTreeNode olderChild = this.children.length == 0 ? null : this.children[0];
+    for (_RenderTreeNode child in this.children) {
+      bool addNewCol = !olderChild.style.isInline || !child.style.isInline;
+      addNewCol &= !child.style.isPre;
+      addNewCol |= widgetsHolder.length == 0;
+      
+      if (addNewCol) { 
+        widgetsHolder.add(List<Widget>());
       }
-      else {
-        Widget nextNodeWidget = _node2Widget(nextNode);
-        if (nextNodeWidget != null) {
-          childWidgets.add(nextNodeWidget);
+
+      Widget childWidget = child.toWidget();
+      if (childWidget != null) {
+        widgetsHolder.last.add(childWidget); 
+      }
+      olderChild = child;
+    }
+    
+    List<Widget> widgets = List<Widget>();
+    for (List<Widget> widgetRow in widgetsHolder) {
+      bool isText = false;
+      List<TextSpan> lineText = List<TextSpan>();
+      for (Widget widget in widgetRow) {
+        if (widget is Text) {
+          isText = true;
+          lineText.add(widget.textSpan);
+        } else {
+          widgets.add(widget);
         }
+      }
+
+      if (isText) {
+        widgets.add(
+          RichText(
+            text: TextSpan(
+              children: lineText,
+              style: TextStyle(color: Colors.black),
+        )));
       }
     }
 
     return Column(
-      children: childWidgets,
+      children: widgets,
       crossAxisAlignment: CrossAxisAlignment.start,
       );
+  }
+}
+
+class HtmlRenderer {
+  String htmlData;
+  Uri htmlContext;
+
+  Widget parse() {
+    dom.Document document = parser.parse(this.htmlData);
+    _RenderTreeNode renderTree = _RenderTreeNode(document.body, null, this.htmlContext);
+    Widget widgeList = renderTree.toWidget();
+    return widgeList;
   }
 }
