@@ -41,6 +41,20 @@ class _RenderTreeNode {
     'img',
   ];
 
+  static const List<String> _textTag = [
+    "strong",
+    "em",
+    "i",
+    "font",
+    "b",
+    "code",
+    "span",
+    "a",
+    "sub",
+    "sup",
+    "text"
+  ];
+  
   static final Map<String, TextStyle> _textStyleSheet = {
     "strong": const TextStyle(
       color: Colors.black,
@@ -119,6 +133,7 @@ class _RenderTreeNode {
     for (dom.Node nextNode in node.nodes) {
       this.children.add(_RenderTreeNode(nextNode, this, this.htmlContext));
     }
+    _postProcess();
   }
 
   void _initNode() {
@@ -132,19 +147,30 @@ class _RenderTreeNode {
     dom.Element nodeE = node as dom.Element;
     this.tag = nodeE.localName;
     this.type = this.tag;
-
-    if (node.children.isEmpty && !_RenderTreeNode._terminalTag.contains(this.tag)) {
-      this.type = 'text';
-      this.text = node.text;
-      return;
-    }
   }
 
   void _addStyle() {
-    this.style = this._styleSheet[this.tag] ?? _RenderTreeNodeStyle(false);
     if (this.parent != null) {
+      this.style = this._styleSheet[this.tag] ?? this.parent.style;
+      this.style = (this.tag == 'text' && this.parent.type == 'text') ? this.parent.style : this.style;
       this.style.isPre = this.parent.style.isPre || this.style.isPre;
+    } else {
+      this.style = this._styleSheet[this.tag] ?? null;
     }
+  }
+
+  void _postProcess() {
+    if (!_textTag.contains(this.tag)) {
+      return;
+    }
+    
+    for (_RenderTreeNode child in this.children) {
+      if (child.type != 'text') {
+        return;
+      }
+    }
+    this.type = 'text';
+    this.text = node.text;
   }
 
   TapGestureRecognizer _linkTapped() {
