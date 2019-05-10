@@ -40,7 +40,7 @@ class ProblemListState extends State<ProblemList> {
       body: Container(
         child: Center(
           child: RefreshIndicator(
-            child: _problemList(),
+            child: Scrollbar(child: _problemList(),),
             onRefresh: _refreshList,
           ) 
         ),
