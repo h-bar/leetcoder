@@ -90,16 +90,6 @@ class _RenderTreeNode {
       color: Colors.blueAccent,
       decorationColor: Colors.blueAccent
     ),
-    "sub": TextStyle(
-      fontFamily: 'monospace',
-      color: Colors.blueGrey,
-      background: Paint()..color = Colors.grey[200],
-    ),
-    "sup": TextStyle(
-      fontFamily: 'monospace',
-      color: Colors.blueGrey,
-      background: Paint()..color = Colors.grey[200],
-    ),
     "text": const TextStyle(
       color: Colors.black,
     )
@@ -111,8 +101,8 @@ class _RenderTreeNode {
     'div': _RenderTreeNodeStyle(false,),
     'pre': _RenderTreeNodeStyle(false, isPre: true),
     'img': _RenderTreeNodeStyle(false),
-    'sub': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['sub']),
-    'sup': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['sup']),
+    'sub': _RenderTreeNodeStyle.textStyole(true, null),
+    'sup': _RenderTreeNodeStyle.textStyole(true, null),
     'strong': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['strong']),
     'span': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['span']),
     'em': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['em']),
@@ -163,7 +153,7 @@ class _RenderTreeNode {
     if (!_textTag.contains(this.tag)) {
       return;
     }
-    
+
     for (_RenderTreeNode child in this.children) {
       if (child.type != 'text') {
         return;
