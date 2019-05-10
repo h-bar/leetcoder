@@ -76,7 +76,17 @@ class _RenderTreeNode {
       color: Colors.blueAccent,
       decorationColor: Colors.blueAccent
     ),
-    "defalut": const TextStyle(
+    "sub": TextStyle(
+      fontFamily: 'monospace',
+      color: Colors.blueGrey,
+      background: Paint()..color = Colors.grey[200],
+    ),
+    "sup": TextStyle(
+      fontFamily: 'monospace',
+      color: Colors.blueGrey,
+      background: Paint()..color = Colors.grey[200],
+    ),
+    "text": const TextStyle(
       color: Colors.black,
     )
   };
@@ -87,6 +97,8 @@ class _RenderTreeNode {
     'div': _RenderTreeNodeStyle(false,),
     'pre': _RenderTreeNodeStyle(false, isPre: true),
     'img': _RenderTreeNodeStyle(false),
+    'sub': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['sub']),
+    'sup': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['sup']),
     'strong': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['strong']),
     'span': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['span']),
     'em': _RenderTreeNodeStyle.textStyole(true, _textStyleSheet['em']),
@@ -196,6 +208,9 @@ class _RenderTreeNode {
         if (widget is Text) {
           isText = true;
           lineText.add(widget.textSpan);
+        } else if (widget is RichText) {
+          isText = true;
+          lineText.addAll(widget.text.children);
         } else {
           widgets.add(widget);
         }
