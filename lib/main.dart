@@ -68,37 +68,29 @@ class ProblemListState extends State<ProblemList> {
   }
 
   Widget _problemList() {
-    return ListView(
+    return ListView.builder(
       physics: BouncingScrollPhysics(),
       padding: const EdgeInsets.all(16.0),
-      children: _summaryRows(this._problems),
+      itemCount: this._problems == null ? 0 : this._problems.length,
+      itemBuilder: (BuildContext context, int index) => _summaryRow(index),
     );
   }
 
-  List<ListTile> _summaryRows(List<ProblemSummary> problems) {
-    List<ListTile> summaryList = List<ListTile>();
-    if (problems == null) {
-      summaryList.add(ListTile(
-        title: Text('Loading'),
-      ));
-      return summaryList;
-    }
-    for (ProblemSummary summary in problems) {
-      summaryList.add(ListTile(
-        title: Text('${summary.qId}. ${summary.title}'),
-        subtitle: Text(summary.difficultyLevel),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProblemPage(
-                summary:  summary
-              )),
-          );
-        },
-      ));
-    }
-    return summaryList;
+  ListTile _summaryRow(int index) {
+    ProblemSummary summary = this._problems[index];
+    return ListTile(
+      title: Text('${summary.qId}. ${summary.title}'),
+      subtitle: Text(summary.difficultyLevel),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProblemPage(
+              summary:  summary
+            )),
+        );
+      },
+    );
   }
 }
 
