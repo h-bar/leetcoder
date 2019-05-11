@@ -186,6 +186,8 @@ class _RenderTreeNode {
         if (!this.style.isPre) {
           text = text.replaceAll(new RegExp(r'\s+'), ' ');
           text = text.trim().isNotEmpty ? text : '';
+
+          text = this.parent.children.indexOf(this) == 0 && this.tag == 'text' ? text.trimLeft() : text;
         }
         
         return text.isEmpty ? null : Text.rich(TextSpan(
