@@ -6,11 +6,10 @@ import 'data_provider.dart';
 ContentLoader cL = ContentLoader();
 
 void main() {
-  cL.inited
-  .then((_) => runApp(MyApp()));
+  cL.inited.then((_) => runApp(LeetCoder()));
 }
 
-class MyApp extends StatelessWidget {
+class LeetCoder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -70,6 +69,7 @@ class ProblemListState extends State<ProblemList> {
 
   Widget _problemList() {
     return ListView(
+      physics: BouncingScrollPhysics(),
       padding: const EdgeInsets.all(16.0),
       children: _summaryRows(this._problems),
     );
