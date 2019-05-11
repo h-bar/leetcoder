@@ -14,7 +14,7 @@ class LeetCoder extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'LeetCoder',
-      theme: new ThemeData(
+      theme: ThemeData(
         primaryColor: Colors.black,
       ),
       home: ProblemList(),
@@ -29,17 +29,28 @@ class ProblemList extends StatefulWidget {
 }
 class ProblemListState extends State<ProblemList> {
   List<ProblemSummary> _problems;
+  List<ProblemSummary> _filteredProblems;
+  Widget _appBartitle;
+  List<Widget> _appBarActions;
+  
+  @override
+  void initState() {
+    super.initState();
+    _showTitleBar();
+    _loadList(refresh: false);
+  }
   
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Problems'), 
+        title: this._appBartitle, 
+        actions: this._appBarActions,
       ),
       body: Container(
         child: Center(
           child: RefreshIndicator(
-            child: Scrollbar(child: _problemList(),),
+            child: Scrollbar(child: _problemList(this._filteredProblems),),
             onRefresh: _refreshList,
           ) 
         ),
@@ -52,32 +63,66 @@ class ProblemListState extends State<ProblemList> {
     .then((problems) {
       return setState(() {
         this._problems = problems;
-        this._problems.sort((a, b) => b.qId - a.qId);  
+        this._problems.sort((a, b) => b.qId - a.qId);
+        this._filteredProblems = this._problems;
       });
     }); 
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadList(refresh: false);
   }
 
   Future<void> _refreshList() {
     return _loadList(refresh: true);
   }
 
-  Widget _problemList() {
+  void _showTitleBar() {
+    setState(() {
+      this._appBartitle = Text('ProblemList');
+      this._appBarActions = [
+        IconButton(
+              icon: Icon(Icons.search),
+              onPressed: _showSearchBar,
+              ),
+        ];
+    });
+  }
+
+  void _showSearchBar() {
+    setState(() {
+      this._appBartitle = TextField(
+        autofocus: true,
+        autocorrect: true,
+        onChanged: this._search,
+        style: TextStyle(color: Colors.white),
+      );
+      this._appBarActions = [
+        IconButton(
+          icon: Icon(Icons.close),
+          onPressed: _showTitleBar,
+          )
+      ];
+    });
+  }
+
+  void _search(String text) {
+    setState(() {
+      if (text.isNotEmpty) {
+        String filterText = text.toLowerCase();
+        this._filteredProblems = this._problems.where((p) => 
+          (p.qId.toString().toLowerCase().contains(filterText)) || 
+          (p.title.toLowerCase().contains(filterText))
+        ).toList();
+      }
+    });
+  }
+  Widget _problemList(List<ProblemSummary> problems) {
     return ListView.builder(
       physics: BouncingScrollPhysics(),
       padding: const EdgeInsets.all(16.0),
-      itemCount: this._problems == null ? 0 : this._problems.length,
-      itemBuilder: (BuildContext context, int index) => _summaryRow(index),
+      itemCount: problems == null ? 0 : problems.length,
+      itemBuilder: (BuildContext context, int index) => _summaryRow(problems[index]),
     );
   }
 
-  ListTile _summaryRow(int index) {
-    ProblemSummary summary = this._problems[index];
+  ListTile _summaryRow(ProblemSummary summary) {
     return ListTile(
       title: Text('${summary.qId}. ${summary.title}'),
       subtitle: Text(summary.difficultyLevel),
@@ -92,6 +137,7 @@ class ProblemListState extends State<ProblemList> {
       },
     );
   }
+
 }
 
 class ProblemPage extends StatefulWidget {
