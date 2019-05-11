@@ -32,7 +32,8 @@ class ProblemListState extends State<ProblemList> {
   List<ProblemSummary> _filteredProblems;
   Widget _appBartitle;
   List<Widget> _appBarActions;
-  
+  Function _popAction;
+
   @override
   void initState() {
     super.initState();
@@ -48,12 +49,15 @@ class ProblemListState extends State<ProblemList> {
         actions: this._appBarActions,
       ),
       body: Container(
-        child: Center(
-          child: RefreshIndicator(
-            child: Scrollbar(child: _problemList(this._filteredProblems),),
-            onRefresh: _refreshList,
-          ) 
-        ),
+        child: WillPopScope(
+          onWillPop: this._popAction,
+          child: Center(
+            child: RefreshIndicator(
+              child: Scrollbar(child: _problemList(this._filteredProblems),),
+              onRefresh: _refreshList,
+            ) 
+          )
+        )
       ),
     );
   }
@@ -82,6 +86,8 @@ class ProblemListState extends State<ProblemList> {
               onPressed: _showSearchBar,
               ),
         ];
+      _search('');
+      this._popAction = null;
     });
   }
 
@@ -99,6 +105,9 @@ class ProblemListState extends State<ProblemList> {
           onPressed: _showTitleBar,
           )
       ];
+      this._popAction = () {
+        this._showTitleBar();
+      };
     });
   }
 
@@ -110,6 +119,8 @@ class ProblemListState extends State<ProblemList> {
           (p.qId.toString().toLowerCase().contains(filterText)) || 
           (p.title.toLowerCase().contains(filterText))
         ).toList();
+      } else {
+        this._filteredProblems = this._problems;
       }
     });
   }
