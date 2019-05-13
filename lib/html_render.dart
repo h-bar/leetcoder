@@ -9,16 +9,14 @@ import 'package:url_launcher/url_launcher.dart';
 class _RenderTreeNodeStyle {
   bool isInline = true;
   bool isPre = false;
+  Color bgColor;
   String href;
   TextStyle textStyle;
 
-  _RenderTreeNodeStyle(bool isInline, {bool isPre: false}) {
+  _RenderTreeNodeStyle(bool isInline, {bool isPre: false, Color bg, TextStyle style}) {
     this.isInline = isInline;
     this.isPre = isPre;
-  }
-
-  _RenderTreeNodeStyle.fromTextStyle(bool isInline, TextStyle style) {
-    this.isInline = isInline;
+    this.bgColor = bg;
     this.textStyle = style;
   }
 }
@@ -92,19 +90,19 @@ class _RenderTreeNode {
     'body': _RenderTreeNodeStyle(false),
     'p': _RenderTreeNodeStyle(false),
     'div': _RenderTreeNodeStyle(false,),
-    'pre': _RenderTreeNodeStyle(false, isPre: true),
+    'pre': _RenderTreeNodeStyle(false, isPre: true, bg: Colors.grey[200]),
     'img': _RenderTreeNodeStyle(false),
-    'sub': _RenderTreeNodeStyle.fromTextStyle(true, null),
-    'sup': _RenderTreeNodeStyle.fromTextStyle(true, null),
-    'strong': _RenderTreeNodeStyle.fromTextStyle(true, _textStyleSheet['strong']),
-    'span': _RenderTreeNodeStyle.fromTextStyle(true, _textStyleSheet['span']),
-    'em': _RenderTreeNodeStyle.fromTextStyle(true, _textStyleSheet['em']),
-    'text': _RenderTreeNodeStyle.fromTextStyle(true, _textStyleSheet['text']),
-    'code': _RenderTreeNodeStyle.fromTextStyle(true, _textStyleSheet['code']),
-    'i': _RenderTreeNodeStyle.fromTextStyle(true, _textStyleSheet['i']),
-    'font': _RenderTreeNodeStyle.fromTextStyle(true, _textStyleSheet['font']),
-    'b': _RenderTreeNodeStyle.fromTextStyle(true, _textStyleSheet['b']),
-    'a': _RenderTreeNodeStyle.fromTextStyle(true, _textStyleSheet['a']),
+    'sub': _RenderTreeNodeStyle(true),
+    'sup': _RenderTreeNodeStyle(true),
+    'strong': _RenderTreeNodeStyle(true, style: _textStyleSheet['strong']),
+    'span': _RenderTreeNodeStyle(true, style: _textStyleSheet['span']),
+    'em': _RenderTreeNodeStyle(true, style: _textStyleSheet['em']),
+    'text': _RenderTreeNodeStyle(true, style: _textStyleSheet['text']),
+    'code': _RenderTreeNodeStyle(true, style: _textStyleSheet['code']),
+    'i': _RenderTreeNodeStyle(true,style:  _textStyleSheet['i']),
+    'font': _RenderTreeNodeStyle(true, style: _textStyleSheet['font']),
+    'b': _RenderTreeNodeStyle(true, style: _textStyleSheet['b']),
+    'a': _RenderTreeNodeStyle(true, style: _textStyleSheet['a']),
   };
 
   _RenderTreeNode(dom.Node node, _RenderTreeNode parent, Uri context) {
@@ -238,12 +236,18 @@ class _RenderTreeNode {
       }
 
       if (isText) {
-        widgets.add(
-          RichText(
-            text: TextSpan(
-              children: lineText,
-              style: TextStyle(color: Colors.black),
-        )));
+        widgets.add(Container(
+            color: this.style.bgColor,
+            child:RichText(
+              text: TextSpan(
+                children: lineText,
+                style: TextStyle(
+                  color: Colors.black,
+                )
+              )
+            )
+          )
+        );
       }
     }
 
