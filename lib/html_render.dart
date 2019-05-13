@@ -72,7 +72,7 @@ class _RenderTreeNode {
     "code": TextStyle(
       fontFamily: 'monospace',
       color: Colors.blueGrey,
-      background: Paint()..color = Colors.grey[200],
+      backgroundColor: Colors.grey[200],
     ),
     "span": TextStyle(
       fontFamily: 'monospace',
