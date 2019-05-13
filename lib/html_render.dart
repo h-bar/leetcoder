@@ -218,7 +218,7 @@ class _RenderTreeNode {
       }
       olderChild = child;
     }
-    // print(widgetsHolder);
+    
     List<Widget> widgets = List<Widget>();
     for (List<Widget> widgetRow in widgetsHolder) {
       bool isText = false;
@@ -243,11 +243,7 @@ class _RenderTreeNode {
                 children: lineText,
                 style: TextStyle(
                   color: Colors.black,
-                )
-              )
-            )
-          )
-        );
+        )))));
       }
     }
 
