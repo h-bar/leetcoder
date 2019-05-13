@@ -33,10 +33,6 @@ class _RenderTreeNode {
   _RenderTreeNode parent;
   List<_RenderTreeNode> children = List<_RenderTreeNode>();
 
-  static const List<String> _terminalTag = [
-    'img',
-  ];
-
   static const List<String> _textTag = [
     "strong",
     "em",
@@ -218,7 +214,7 @@ class _RenderTreeNode {
       }
       olderChild = child;
     }
-    
+
     List<Widget> widgets = List<Widget>();
     for (List<Widget> widgetRow in widgetsHolder) {
       bool isText = false;
