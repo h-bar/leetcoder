@@ -234,6 +234,7 @@ class _RenderTreeNode {
       if (isText) {
         widgets.add(Container(
             color: this.style.bgColor,
+            constraints: BoxConstraints(minWidth: double.infinity),
             child:RichText(
               text: TextSpan(
                 children: lineText,
