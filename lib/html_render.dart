@@ -148,7 +148,7 @@ class _RenderTreeNode {
       this.style.href = this.node.attributes['href'] ?? this.parent.style.href;
       this.style.isPre = this.parent.style.isPre || this.style.isPre;
 
-      if (this.parent.type == 'text') {
+      if (this.parent.style.textStyle != null) {
         this.style.textStyle = this.parent.style.textStyle.merge(this.style.textStyle);
       }
     }
