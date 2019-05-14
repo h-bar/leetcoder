@@ -251,11 +251,15 @@ class _RenderTreeNode {
       );
     }
 
-    return Container(
+    if (!this.style.isInline) {
+      renderedWidget =  Container(
             color: this.style.bgColor,
             constraints: BoxConstraints(minWidth: double.infinity),
             child: renderedWidget
     );
+  }
+
+    return renderedWidget;
   }
 }
 
