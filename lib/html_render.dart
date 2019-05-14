@@ -232,28 +232,33 @@ class _RenderTreeNode {
       }
 
       if (isText) {
-        widgets.add(Container(
-            color: this.style.bgColor,
-            constraints: BoxConstraints(minWidth: double.infinity),
-            child:RichText(
+        widgets.add(RichText(
               text: TextSpan(
                 children: lineText,
                 style: TextStyle(
                   color: Colors.black,
-        )))));
+        ))));
       }
     }
 
     if (widgets.isEmpty) {
       return null;
     }
+
+    Widget renderedWidget;
     if (widgets.length == 1) {
-      return widgets[0];
+      renderedWidget = widgets[0];
+    } else {
+      renderedWidget = Column(
+        children: widgets,
+        crossAxisAlignment: CrossAxisAlignment.start,
+      );
     }
 
-    return Column(
-      children: widgets,
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+            color: this.style.bgColor,
+            constraints: BoxConstraints(minWidth: double.infinity),
+            child: renderedWidget
     );
   }
 }
