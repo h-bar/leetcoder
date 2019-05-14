@@ -212,28 +212,37 @@ class _RenderTreeNode {
     }
 
     List<Widget> widgets = List<Widget>();
+    
+    RichText conctracteTexts(List<TextSpan> texts) {
+      if (texts.isNotEmpty) {
+        return RichText(
+          text: TextSpan(
+            children: texts,
+            style: TextStyle(
+              color: Colors.black,
+        )));
+      }
+      return null;
+    }
+
     for (List<Widget> widgetRow in widgetsHolder) {
-      bool isText = false;
       List<TextSpan> lineText = List<TextSpan>();
       for (Widget widget in widgetRow) {
         if (widget is Text) {
-          isText = true;
           lineText.add(widget.textSpan);
         } else if (widget is RichText) {
-          isText = true;
           lineText.addAll(widget.text.children);
         } else {
+          if (lineText.isNotEmpty) {
+            widgets.add(conctracteTexts(lineText));
+          }
+          lineText.clear();
           widgets.add(widget);
         }
       }
 
-      if (isText) {
-        widgets.add(RichText(
-              text: TextSpan(
-                children: lineText,
-                style: TextStyle(
-                  color: Colors.black,
-        ))));
+      if (lineText.isNotEmpty) {
+        widgets.add(conctracteTexts(lineText));
       }
     }
 
@@ -250,14 +259,14 @@ class _RenderTreeNode {
         crossAxisAlignment: CrossAxisAlignment.start,
       );
     }
-
+  
     if (!this.style.isInline) {
       renderedWidget =  Container(
-            color: this.style.bgColor,
-            constraints: BoxConstraints(minWidth: double.infinity),
-            child: renderedWidget
-    );
-  }
+        color: this.style.bgColor,
+        constraints: BoxConstraints(minWidth: double.infinity),
+        child: renderedWidget
+      );
+    }
 
     return renderedWidget;
   }
