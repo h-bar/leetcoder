@@ -68,10 +68,6 @@ class _RenderTreeNode {
       color: Colors.blueGrey,
       backgroundColor: Colors.grey[200],
     ),
-    "span": TextStyle(
-      fontFamily: 'monospace',
-      color: Colors.blueGrey,
-    ),
     "a": const TextStyle(
       decoration: TextDecoration.underline,
       color: Colors.blueAccent,
@@ -91,7 +87,7 @@ class _RenderTreeNode {
     'sub': _RenderTreeNodeStyle(true),
     'sup': _RenderTreeNodeStyle(true),
     'strong': _RenderTreeNodeStyle(true, style: _textStyleSheet['strong']),
-    'span': _RenderTreeNodeStyle(true, style: _textStyleSheet['span']),
+    'span': _RenderTreeNodeStyle(true),
     'em': _RenderTreeNodeStyle(true, style: _textStyleSheet['em']),
     'text': _RenderTreeNodeStyle(true, style: _textStyleSheet['text']),
     'code': _RenderTreeNodeStyle(true, style: _textStyleSheet['code']),
