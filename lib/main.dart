@@ -14,9 +14,6 @@ class LeetCoder extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'LeetCoder',
-      theme: ThemeData(
-        primaryColor: Colors.black,
-      ),
       home: ProblemList(),
     );
   }
@@ -97,7 +94,6 @@ class ProblemListState extends State<ProblemList> {
         autofocus: true,
         autocorrect: true,
         onChanged: this._search,
-        style: TextStyle(color: Colors.white),
       );
       this._appBarActions = [
         IconButton(
@@ -190,7 +186,6 @@ class ProblemPageState extends State<ProblemPage> with SingleTickerProviderState
           Tab(text: 'Description',),
           Tab(text: 'Solution',)
         ],
-        labelColor: Colors.black,
       ),
     );
   }
