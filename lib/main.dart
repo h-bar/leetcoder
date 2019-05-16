@@ -30,8 +30,6 @@ class ProblemListState extends State<ProblemList> {
   AppBar _appBar;
   AppBar _titleBar;
   AppBar _searchBar;
-  Widget _appBartitle;
-  List<Widget> _appBarActions;
   Function _popAction;
 
   @override
