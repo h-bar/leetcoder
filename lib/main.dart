@@ -61,10 +61,16 @@ class ProblemListState extends State<ProblemList> {
   void _initAppBar() {
     this._titleBar = AppBar(
       title: Text('ProblemList'),
-      actions: [IconButton(
-        icon: Icon(Icons.search),
-        onPressed: _showSearchBar,
-    )],);
+      actions: [
+        IconButton(
+          icon: Icon(Icons.file_download),
+          onPressed: _downloadAll,
+        ),
+        IconButton(
+          icon: Icon(Icons.search),
+          onPressed: _showSearchBar,
+        ),
+    ],);
     this._searchBar = AppBar(
       title: TextField(
         autofocus: true,
@@ -77,6 +83,13 @@ class ProblemListState extends State<ProblemList> {
           onPressed: _showTitleBar,
     )],);
   }
+
+  Future<void> _downloadAll() {
+    for (ProblemSummary p in this._problems) {
+      cL.loadProblem(p, refresh: true);
+    }
+  }
+
   Future<void> _loadList({refresh = false}) {
     return cL.loadProblemList(refresh: refresh)
     .then((problems) {
