@@ -27,6 +27,9 @@ class ProblemList extends StatefulWidget {
 class ProblemListState extends State<ProblemList> {
   List<ProblemSummary> _problems;
   List<ProblemSummary> _filteredProblems;
+  AppBar _appBar;
+  AppBar _titleBar;
+  AppBar _searchBar;
   Widget _appBartitle;
   List<Widget> _appBarActions;
   Function _popAction;
@@ -34,17 +37,15 @@ class ProblemListState extends State<ProblemList> {
   @override
   void initState() {
     super.initState();
-    _showTitleBar();
-    _loadList(refresh: false);
+    this._initAppBar();
+    this._showTitleBar();
+    this._loadList(refresh: false);
   }
   
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: this._appBartitle, 
-        actions: this._appBarActions,
-      ),
+      appBar: this._appBar,
       body: Container(
         child: WillPopScope(
           onWillPop: this._popAction,
@@ -59,6 +60,25 @@ class ProblemListState extends State<ProblemList> {
     );
   }
 
+  void _initAppBar() {
+    this._titleBar = AppBar(
+      title: Text('ProblemList'),
+      actions: [IconButton(
+        icon: Icon(Icons.search),
+        onPressed: _showSearchBar,
+    )],);
+    this._searchBar = AppBar(
+      title: TextField(
+        autofocus: true,
+        autocorrect: true,
+        onChanged: this._search,
+      ),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.close),
+          onPressed: _showTitleBar,
+    )],);
+  }
   Future<void> _loadList({refresh = false}) {
     return cL.loadProblemList(refresh: refresh)
     .then((problems) {
@@ -76,13 +96,7 @@ class ProblemListState extends State<ProblemList> {
 
   void _showTitleBar() {
     setState(() {
-      this._appBartitle = Text('ProblemList');
-      this._appBarActions = [
-        IconButton(
-              icon: Icon(Icons.search),
-              onPressed: _showSearchBar,
-              ),
-        ];
+      this._appBar = this._titleBar;
       _search('');
       this._popAction = null;
     });
@@ -90,17 +104,7 @@ class ProblemListState extends State<ProblemList> {
 
   void _showSearchBar() {
     setState(() {
-      this._appBartitle = TextField(
-        autofocus: true,
-        autocorrect: true,
-        onChanged: this._search,
-      );
-      this._appBarActions = [
-        IconButton(
-          icon: Icon(Icons.close),
-          onPressed: _showTitleBar,
-          )
-      ];
+      this._appBar = this._searchBar;
       this._popAction = () {
         this._showTitleBar();
       };
