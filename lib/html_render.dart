@@ -25,7 +25,7 @@ class _RenderTreeNodeStyle {
     TextStyle textStyle;
     if (this.textStyle != null) {
       textStyle = this.textStyle.merge(nodeStyle.textStyle);
-}
+    }
 
     return _RenderTreeNodeStyle(
       nodeStyle.isInline, 
@@ -158,7 +158,7 @@ class _RenderTreeNode {
     this.style.href = this.node.attributes['href'];
     this.style = this.parent == null ? this.style : this.style.merge(this.parent.style);
     this.style = this._styleSheet[this.tag] == null ? this.style : this.style.merge(this._styleSheet[this.tag]);  
-    
+
     for (_RenderTreeNode child in this.children) {
       child.addStyle();
     }
@@ -284,9 +284,7 @@ class HtmlRenderer {
 
   Widget parse() {
     dom.Document document = parser.parse(this.htmlData);
-    _RenderTreeNode renderTree = _RenderTreeNode(document.body, null, this.htmlContext);
-    renderTree.initNode();
-    renderTree.addStyle();
+    _RenderTreeNode renderTree = _RenderTreeNode(document.body, null, this.htmlContext)..initNode()..addStyle();
     Widget widgeList = renderTree.toWidget();
     return widgeList;
   }
