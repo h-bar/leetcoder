@@ -278,14 +278,9 @@ class _RenderTreeNode {
   }
 }
 
-class HtmlRenderer {
-  String htmlData;
-  Uri htmlContext;
-
-  Widget parse() {
-    dom.Document document = parser.parse(this.htmlData);
-    _RenderTreeNode renderTree = _RenderTreeNode(document.body, null, this.htmlContext)..initNode()..addStyle();
-    Widget widgeList = renderTree.toWidget();
-    return widgeList;
-  }
+Widget renderWidget(String htmlData, Uri htmlContext) {
+  dom.Document document = parser.parse(htmlData);
+  _RenderTreeNode renderTree = _RenderTreeNode(document.body, null, htmlContext)..initNode()..addStyle();
+  Widget widgeList = renderTree.toWidget();
+  return widgeList;
 }

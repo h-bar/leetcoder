@@ -84,7 +84,7 @@ class ProblemListState extends State<ProblemList> {
     )],);
   }
 
-  Future<void> _downloadAll() {
+  void _downloadAll() {
     for (ProblemSummary p in this._problems) {
       cL.loadProblem(p, refresh: true);
     }
@@ -171,7 +171,6 @@ class ProblemPage extends StatefulWidget {
 class ProblemPageState extends State<ProblemPage> with SingleTickerProviderStateMixin {
   final ProblemSummary summary;
   Problem problem;
-  HtmlRenderer _renderer = HtmlRenderer();
   TabController _tabController;
   ProblemPageState({@required this.summary});
   @override
@@ -230,22 +229,22 @@ class ProblemPageState extends State<ProblemPage> with SingleTickerProviderState
   }
 
   Widget _detailePage() {
-    _renderer.htmlData = this.problem != null ? this.problem.description : '<p>Loading...<p/>';
-    _renderer.htmlContext = this.problem != null ?  this.problem.descContext : null;
+    String htmlData = this.problem != null ? this.problem.description : '<p>Loading...<p/>';
+    Uri htmlContext = this.problem != null ?  this.problem.descContext : null;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
       physics: const AlwaysScrollableScrollPhysics(),
-      child: _renderer.parse(),
+      child: renderWidget(htmlData, htmlContext),
     );
   }
 
   Widget _solutionPage() {
-    _renderer.htmlData = this.problem != null ? this.problem.solution : '<p>Loading...<p/>';
-    _renderer.htmlContext = this.problem != null ?  this.problem.solutionContext : null;
+    String htmlData = this.problem != null ? this.problem.solution : '<p>Loading...<p/>';
+    Uri htmlContext = this.problem != null ?  this.problem.solutionContext : null;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
       physics: const AlwaysScrollableScrollPhysics(),
-      child: _renderer.parse(),
+      child: renderWidget(htmlData, htmlContext),
     );
   }
 }
