@@ -194,9 +194,10 @@ class ProblemPageState extends State<ProblemPage> with SingleTickerProviderState
       ),
       bottomNavigationBar: TabBar(
         controller: _tabController,
+        labelColor: Colors.black,
         tabs: <Widget>[
-          Tab(text: 'Description',),
-          Tab(text: 'Solution',)
+          Tab(text: 'Description'),
+          Tab(text: 'Solution')
         ],
       ),
     );
