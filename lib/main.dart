@@ -175,6 +175,12 @@ class ProblemPageState extends State<ProblemPage> with SingleTickerProviderState
   ProblemPageState({@required this.summary});
   @override
   Widget build(BuildContext context) {
+    String descHTML = this.problem != null ? this.problem.description : '<p>Loading...<p/>';
+    Uri descContext = this.problem != null ?  this.problem.descContext : null;
+    
+    String solutionHTML = this.problem != null ? this.problem.solution : '<p>Loading...<p/>';
+    Uri solutionContext = this.problem != null ?  this.problem.solutionContext : null;
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(this.summary.title),
@@ -182,17 +188,9 @@ class ProblemPageState extends State<ProblemPage> with SingleTickerProviderState
       body: TabBarView(
         controller: _tabController,
         children: <Widget>[
-          Container(
-          child: RefreshIndicator(
-            child: _detailePage(),
-            onRefresh: _refreshProblem,
-          ),),
-          Container(
-          child: RefreshIndicator(
-            child: _solutionPage(),
-            onRefresh: _refreshProblem,
-          ) 
-        )]
+          html2View(descHTML, descContext, refreshCallback: _refreshProblem),
+          html2View(solutionHTML, solutionContext, refreshCallback: _refreshProblem), 
+        ]
       ),
       bottomNavigationBar: TabBar(
         controller: _tabController,
@@ -226,25 +224,5 @@ class ProblemPageState extends State<ProblemPage> with SingleTickerProviderState
   }
   Future<void> _refreshProblem() {
     return _loadProblem(refresh: true);
-  }
-
-  Widget _detailePage() {
-    String htmlData = this.problem != null ? this.problem.description : '<p>Loading...<p/>';
-    Uri htmlContext = this.problem != null ?  this.problem.descContext : null;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20.0),
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: renderWidget(htmlData, htmlContext),
-    );
-  }
-
-  Widget _solutionPage() {
-    String htmlData = this.problem != null ? this.problem.solution : '<p>Loading...<p/>';
-    Uri htmlContext = this.problem != null ?  this.problem.solutionContext : null;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20.0),
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: renderWidget(htmlData, htmlContext),
-    );
   }
 }

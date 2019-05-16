@@ -278,9 +278,19 @@ class _RenderTreeNode {
   }
 }
 
-Widget renderWidget(String htmlData, Uri htmlContext) {
+Widget html2Widget(String htmlData, Uri htmlContext) {
   dom.Document document = parser.parse(htmlData);
   _RenderTreeNode renderTree = _RenderTreeNode(document.body, null, htmlContext)..initNode()..addStyle();
-  Widget widgeList = renderTree.toWidget();
-  return widgeList;
+  return renderTree.toWidget();
+}
+
+Widget html2View(String htmlData, Uri htmlContext, {Function refreshCallback}) {
+  return RefreshIndicator(
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.all(20.0),
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: html2Widget(htmlData, htmlContext),
+    ),
+    onRefresh: refreshCallback
+  );
 }
