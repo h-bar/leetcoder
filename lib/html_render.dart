@@ -13,11 +13,27 @@ class _RenderTreeNodeStyle {
   String href;
   TextStyle textStyle;
 
-  _RenderTreeNodeStyle(bool isInline, {bool isPre: false, Color bg, TextStyle style}) {
+  _RenderTreeNodeStyle(bool isInline, {bool isPre: false, Color bg, TextStyle style, String href}) {
     this.isInline = isInline;
     this.isPre = isPre;
     this.bgColor = bg;
     this.textStyle = style;
+    this.href = href;
+  }
+
+  _RenderTreeNodeStyle merge(_RenderTreeNodeStyle nodeStyle) {
+    TextStyle textStyle;
+    if (this.textStyle != null) {
+      textStyle = this.textStyle.merge(nodeStyle.textStyle);
+}
+
+    return _RenderTreeNodeStyle(
+      nodeStyle.isInline, 
+      isPre: this.isPre || nodeStyle.isPre,
+      bg: nodeStyle.bgColor ?? this.bgColor,
+      href: nodeStyle.href ?? this.href,
+      style: textStyle
+      );
   }
 }
 
@@ -78,7 +94,7 @@ class _RenderTreeNode {
     )
   };
 
-  Map<String, _RenderTreeNodeStyle> _styleSheet = {
+  final Map<String, _RenderTreeNodeStyle> _styleSheet = {
     'body': _RenderTreeNodeStyle(false),
     'p': _RenderTreeNodeStyle(false),
     'div': _RenderTreeNodeStyle(false,),
@@ -130,7 +146,7 @@ class _RenderTreeNode {
       return;
     }
 
-    this.type   = 'text';
+    this.type = 'text';
     if (this.children.length == 1 && this.children[0].tag == 'text') {
       this.text = node.text;
       this.children = [];
@@ -138,16 +154,10 @@ class _RenderTreeNode {
   }
 
   void addStyle() {
-    this.style = this._styleSheet[this.tag];  
-    if (this.parent != null) {
-      this.style = this.style ?? this.parent.style;
-      this.style.href = this.node.attributes['href'] ?? this.parent.style.href;
-      this.style.isPre = this.parent.style.isPre || this.style.isPre;
-
-      if (this.parent.style.textStyle != null) {
-        this.style.textStyle = this.parent.style.textStyle.merge(this.style.textStyle);
-      }
-    }
+    this.style = this.type == 'text' ? this._styleSheet['text'] : this._styleSheet['body'];
+    this.style.href = this.node.attributes['href'];
+    this.style = this.parent == null ? this.style : this.style.merge(this.parent.style);
+    this.style = this._styleSheet[this.tag] == null ? this.style : this.style.merge(this._styleSheet[this.tag]);  
     
     for (_RenderTreeNode child in this.children) {
       child.addStyle();
@@ -216,11 +226,7 @@ class _RenderTreeNode {
     RichText conctracteTexts(List<TextSpan> texts) {
       if (texts.isNotEmpty) {
         return RichText(
-          text: TextSpan(
-            children: texts,
-            style: TextStyle(
-              color: Colors.black,
-        )));
+          text: TextSpan(children: texts,));
       }
       return null;
     }
