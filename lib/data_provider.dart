@@ -53,7 +53,7 @@ class ContentLoader {
     });
   }
 
-  Future<List<ProblemSummary>> loadProblemList({refresh = false}) {
+  Future<List<ProblemSummary>> loadProblemList({refresh: false}) {
     List<ProblemSummary> problemList = List<ProblemSummary>();
     return _load(_SummaryLoader.cacheFileName, _SummaryLoader.request, refresh)
     .then((content){
@@ -65,7 +65,7 @@ class ContentLoader {
     });
   }
 
-  Future<Problem> loadProblem(ProblemSummary summary, {refresh = false}) {
+  Future<Problem> loadProblem(ProblemSummary summary, {refresh: false}) {
     return _load(_DetailLoader.cacheFilePath(summary.titleSlug), _DetailLoader.generateRequest(summary.titleSlug), refresh)
     .then((content){
       content = content['data']['question'];
