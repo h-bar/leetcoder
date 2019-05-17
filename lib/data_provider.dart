@@ -11,7 +11,7 @@ class ContentLoader {
   ContentLoader() {
     this.inited = pp.getApplicationDocumentsDirectory()
     .then((dir) {
-      return this.appRootPath = dir.absolute.path; 
+      this.appRootPath = dir.absolute.path; 
     });
 
     // this.appRootPath = path.current;
