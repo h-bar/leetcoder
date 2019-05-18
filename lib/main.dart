@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 
 import 'html_render.dart';
-import 'data_provider.dart';
+import 'data_model.dart';
+import 'content_loader.dart';
 
-ContentLoader cL = ContentLoader();
+import 'package:path_provider/path_provider.dart' as pp;
 
+String appRoot;
 void main() {
-  cL.inited.then((_) => runApp(LeetCoder()));
+  pp.getApplicationDocumentsDirectory()
+  .then((dir) {
+    appRoot = dir.absolute.path;
+    runApp(LeetCoder());
+  });
 }
 
 class LeetCoder extends StatelessWidget {
@@ -85,13 +91,13 @@ class ProblemListState extends State<ProblemList> {
   }
 
   void _downloadAll() {
-    for (ProblemSummary p in this._problems) {
-      cL.loadProblem(p, refresh: true);
-    }
+    // for (ProblemSummary p in this._problems) {
+    //   cL.loadProblem(p, refresh: true);
+    // }
   }
 
   Future<void> _loadList({refresh = false}) {
-    return cL.loadProblemList(refresh: refresh)
+    return loadContent(SummaryLoader() ,refresh: refresh, dir: appRoot)
     .then((problems) {
       return setState(() {
         this._problems = problems;
@@ -203,8 +209,8 @@ class ProblemPageState extends State<ProblemPage> with SingleTickerProviderState
     );
   }
 
-  Future<void> _loadProblem({refresh = false}) {
-    return cL.loadProblem(summary, refresh: refresh)
+  Future<void> _loadProblem({refresh: false}) {
+    return loadContent(ProblemLoader(summary), refresh: refresh, dir: appRoot)
     .then((problem) {
       return setState(() {
         this.problem = problem;
