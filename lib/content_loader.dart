@@ -28,19 +28,3 @@ class ContentLoader {
     print('Loading');
   }
 }
-
-
-class ImageLoader extends ContentLoader{
-  Uri _uri;
-  http.Request get request => http.Request('GET', this._uri);
-  String get cacheFileName {
-    List<String> pathSegments = ['.'];
-    pathSegments.addAll(request.url.pathSegments);
-    return path.joinAll(pathSegments);
-  }
-  List<int> processContent(List<int> contentBytes) => contentBytes;
-
-  ImageLoader(Uri uri) {
-    this._uri = uri;
-  }
-}
