@@ -6,6 +6,8 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
 import 'package:url_launcher/url_launcher.dart';
 
+import 'image_loader.dart';
+
 class _RenderTreeNodeStyle {
   bool isInline = true;
   bool isPre = false;
@@ -202,7 +204,7 @@ class _RenderTreeNode {
         case 'img':
           Uri uri = Uri.parse(this.node.attributes['src']);
           uri = uri.hasScheme ? uri : this.htmlContext.resolveUri(uri);
-          return Image.network(uri.toString());
+          return Image(image: CLImage(uri.toString(), resourceDir: this.resourceDir),);
       }
     }
       
