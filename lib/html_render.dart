@@ -45,6 +45,7 @@ class _RenderTreeNode {
   dom.Node node;
   _RenderTreeNodeStyle style;
   Uri htmlContext;
+  String resourceDir;
 
   _RenderTreeNode parent;
   List<_RenderTreeNode> children = List<_RenderTreeNode>();
@@ -113,10 +114,11 @@ class _RenderTreeNode {
     'a': _RenderTreeNodeStyle(true, style: _textStyleSheet['a']),
   };
 
-  _RenderTreeNode(dom.Node node, _RenderTreeNode parent, Uri context) {
+  _RenderTreeNode(dom.Node node, _RenderTreeNode parent, Uri context, String resourceDir) {
     this.node = node;
     this.parent = parent;
     this.htmlContext = context;
+    this.resourceDir = resourceDir;
 
     if (this.node is dom.Text) {
       this.text = this.node.text;
@@ -129,7 +131,7 @@ class _RenderTreeNode {
     }
 
     for (dom.Node nextNode in node.nodes) {
-      this.children.add(_RenderTreeNode(nextNode, this, this.htmlContext));
+      this.children.add(_RenderTreeNode(nextNode, this, this.htmlContext, this.resourceDir));
     }
   }
 
@@ -278,18 +280,18 @@ class _RenderTreeNode {
   }
 }
 
-Widget html2Widget(String htmlData, Uri htmlContext) {
+Widget html2Widget(String htmlData, Uri htmlContext, String resourceDir) {
   dom.Document document = parser.parse(htmlData);
-  _RenderTreeNode renderTree = _RenderTreeNode(document.body, null, htmlContext)..initNode()..addStyle();
+  _RenderTreeNode renderTree = _RenderTreeNode(document.body, null, htmlContext, resourceDir)..initNode()..addStyle();
   return renderTree.toWidget();
 }
 
-Widget html2View(String htmlData, Uri htmlContext, {Function refreshCallback}) {
+Widget html2View(String htmlData, Uri htmlContext,  String resourceDir, {Function refreshCallback}) {
   return RefreshIndicator(
     child: SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
       physics: const AlwaysScrollableScrollPhysics(),
-      child: html2Widget(htmlData, htmlContext),
+      child: html2Widget(htmlData, htmlContext, resourceDir),
     ),
     onRefresh: refreshCallback
   );

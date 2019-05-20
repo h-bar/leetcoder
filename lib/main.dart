@@ -194,8 +194,8 @@ class ProblemPageState extends State<ProblemPage> with SingleTickerProviderState
       body: TabBarView(
         controller: _tabController,
         children: <Widget>[
-          html2View(descHTML, descContext, refreshCallback: _refreshProblem),
-          html2View(solutionHTML, solutionContext, refreshCallback: _refreshProblem), 
+          html2View(descHTML, descContext, appRoot, refreshCallback: _refreshProblem),
+          html2View(solutionHTML, solutionContext, appRoot, refreshCallback: _refreshProblem), 
         ]
       ),
       bottomNavigationBar: TabBar(
