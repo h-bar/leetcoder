@@ -126,7 +126,7 @@ class _RenderTreeNode {
       this.text = this.node.text;
       this.type = 'text';
       this.tag = 'text';
-    } else {
+    } else if (this.node is dom.Element) {
       dom.Element nodeE = this.node as dom.Element;
       this.tag = nodeE.localName;
       this.type = this.tag;
