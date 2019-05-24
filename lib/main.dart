@@ -90,10 +90,16 @@ class ProblemListState extends State<ProblemList> {
     )],);
   }
 
-  void _downloadAll() {
-    // for (ProblemSummary p in this._problems) {
-    //   cL.loadProblem(p, refresh: true);
-    // }
+  void _downloadAll() async {
+    int total = this._problems.length;
+    int downloaded = 0;
+    for (ProblemSummary s in this._problems) {
+      Problem p = await loadContent(ProblemLoader(s), dir: appRoot);
+      cacheHTML(p.description, p.descContext, appRoot);
+      cacheHTML(p.solution, p.solutionContext, appRoot);
+      downloaded ++;
+      print(downloaded.toString() + '/' + total.toString() + ' Downloaded');
+    }
   }
 
   Future<void> _loadList({refresh = false}) {

@@ -7,6 +7,7 @@ import 'package:html/parser.dart' as parser;
 import 'package:url_launcher/url_launcher.dart';
 
 import 'image_loader.dart';
+import 'content_loader.dart';
 
 class _RenderTreeNodeStyle {
   bool isInline = true;
@@ -277,8 +278,24 @@ class _RenderTreeNode {
         child: renderedWidget
       );
     }
-
     return renderedWidget;
+  }
+}
+
+void cacheHTML(String htmldata, Uri htmlContext, String resourceDir) {
+  dom.Document document = parser.parse(htmldata);
+  List<dom.Element> nodes = List<dom.Element>();
+  nodes.addAll(document.children);
+
+  while (nodes.isNotEmpty) {
+    dom.Element node = nodes.removeLast();
+    nodes.addAll(node.children);
+    
+    if (node.localName == 'img') {
+      Uri uri = Uri.parse(node.attributes['src']);
+      uri = uri.hasScheme ? uri : htmlContext.resolveUri(uri);
+      loadContent(ImageLoader(uri), refresh: true, dir: resourceDir);
+    }
   }
 }
 
